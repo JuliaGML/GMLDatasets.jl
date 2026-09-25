@@ -8,6 +8,8 @@ if "core" in GROUPS
     @safetestset "Docstrings" include("integration/docstrings.jl")
     @safetestset "Pendulum dataset" include("pendulum.jl")
     @safetestset "MNIST tutorial figure" include("quality/mnist_figure.jl")
+    @safetestset "Revision harness: run artifact schema" include("../scripts/revision/test_run_artifact_schema.jl")
+    @safetestset "Revision harness: retraction record schema" include("../scripts/revision/test_retraction_record_schema.jl")
 end
 if "doctests" in GROUPS
     @safetestset "Doctests" include("quality/doctests.jl")
