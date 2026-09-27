@@ -41,6 +41,7 @@ breaking release).
   because the two drive different ones — this repository's image trainer drives
   `GeometricOptimizers` directly (`scripts/geometric_optimizers/leaf_composite.jl`) and the pendulum
   trainer goes through `GeometricMachineLearning`'s training loop.
+  The pendulum trainer defaults to 1000 epochs, configurable via `SAE_N_EPOCHS`.
 
   **The retraction benchmark is not here.** It is `scripts/retraction_records.jl` in
   `GeometricOptimizers`, beside the algorithms, the reference and the seeded lift sweep it measures,
@@ -188,22 +189,6 @@ breaking release).
   Under the CI Downgrade job, which forces every dependency to its lower bound, these four resolved
   to the newer versions above instead, so the old floors advertised versions that the dependency
   graph cannot select. The upper bounds are unchanged.
-
-### Fixed
-
-- **The pendulum stage never resumed.** Its restart test read `configuration_key`, `repetition` and
-  `seed` out of `pendulum-runs.csv` with `awk -F,`, but the display name between them is a quoted
-  field containing a comma — `"Geometric Adam (Stiefel, Cayley retraction)"` — so every later column
-  was shifted by one and the test compared `transport` against a repetition number. It could not
-  match, so an interrupted pendulum matrix re-ran every seed it had already completed, silently and
-  at full cost. The runner now asks `validate_run_artifacts.jl --list-complete` for the completed
-  jobs, which parses the CSV properly.
-
-- **The pendulum trainer quoted a learning rate it never applied.** `Optimizer(method, network;
-  retraction = cayley)` takes its step size from the *method*'s default — `1e-3` for `Adam`, `1e-2`
-  for the rest — while every run record and every HDF5 attribute reported the configured
-  `SAE_STEP_SIZE`. The four configurations were therefore not compared at the rates the comparison
-  says they were. The rate is now passed explicitly.
 
 ### Removed
 
