@@ -128,9 +128,12 @@ let fig = Figure(size=(1220, 480), fontsize=25)
             lines!(ax, x, y; color=sep, linewidth=3.6, linestyle=ls)
         end
     end
+    # The unstable equilibrium and its image are dots in the separatrix red B03030 of the paper and
+    # note palettes, with a white rim so they stand out on the red curves.
+    Pcolor = Makie.RGBf(0xB0/255, 0x30/255, 0x30/255)
     P = enc(lift(0.0, 0.0))
-    scatter!(ax1, [0, 2π], [0, 0]; color=:black, strokecolor=:white, strokewidth=2.5, markersize=19)
-    scatter!(ax2, [P[1]], [P[2]]; color=:black, strokecolor=:white, strokewidth=2.5, markersize=19)
+    scatter!(ax1, [0, 2π], [0, 0]; color=Pcolor, strokecolor=:white, strokewidth=2.5, markersize=19)
+    scatter!(ax2, [P[1]], [P[2]]; color=Pcolor, strokecolor=:white, strokewidth=2.5, markersize=19)
     xlims!(ax1, -0.65, 2π + 0.65)
     text!(ax2, P[1], P[2]; text=L"\bar{P}", align=(:left, :center), offset=(12, 0), fontsize=25)
     Label(fig[2,1], "(a)"; fontsize=25, tellwidth=false)
