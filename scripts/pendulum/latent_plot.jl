@@ -21,7 +21,8 @@
 #
 # Produces:
 #   plots/pendulum_sae_latent.png   (OUTFILE)
-#   a table of action, latent invariant, reconstruction and symplecticity per level
+#   a table of action, latent invariant, reconstruction and symplecticity per level; the
+#   reconstruction error is the time-sampled one of reconstruction_error.jl
 #
 # Moved here from the symplectic-autoencoder talk's working directory
 # (its `pendulum_sae_latent_plot_paper.jl`), where it sat beside the figure it makes.
@@ -48,6 +49,7 @@ const NQUAD    = 16_000
 # decoder is not symplectic, and the last column of the table, the relative difference between the
 # latent area and the action of the decoded curve, is no longer small.
 include(joinpath(@__DIR__, "architectures.jl"))
+include(joinpath(@__DIR__, "reconstruction_error.jl"))
 const nn  = load_pendulum_network(sae_path)
 const enc = encoder(nn)
 const dec = decoder(nn)
@@ -69,21 +71,14 @@ encode(θs, pθs) = [enc(lift(a,b)) for (a,b) in zip(θs,pθs)]
 pinv2(Z) = compute!(CanonicalFirstPI{Float64,2}(length(Z)), Matrix(reduce(hcat,[Float64.(z) for z in Z])'))
 pinv4(X) = compute!(CanonicalFirstPI{Float64,4}(length(X)), Matrix(reduce(hcat,[Float64.(x) for x in X])'))
 
-function relerr(θs, pθs)
-    num = 0.0; den = 0.0
-    for (a,b) in zip(θs,pθs); x = lift(a,b); r = dec(enc(x))
-        num += sum(abs2, r .- x); den += sum(abs2, x) end
-    sqrt(num/den)
-end
-
-println("\n     H   regime    action ∮pθdθ   latent ∮p dq   action gap   recon (rel L2)   sympl.")
+println("\n     H   regime    action ∮pθdθ   latent ∮p dq   action gap     recon e_rec    sympl.")
 println("  " * "─"^88)
 lib=Float64[]; rot=Float64[]; gl=Float64[]; gr=Float64[]; sy=Float64[]
 for H in H_levels
     θs, pθs, dθ = level_set(H; n=NQUAD)
     action = abs(sum(pθs .* dθ) * (2π/length(pθs)))
     Z = encode(θs, pθs); latent = abs(pinv2(Z)); dec_i = abs(pinv4([dec(z) for z in Z]))
-    gap = abs(latent-action)/action; rec = relerr(θs[1:8:end], pθs[1:8:end])
+    gap = abs(latent-action)/action; rec = reconstruction_error(enc, dec, H).rel
     s   = abs(latent-dec_i)/latent; push!(sy,s)
     (H<1 ? (push!(lib,rec); push!(gl,gap)) : (push!(rot,rec); push!(gr,gap)))
     @printf("  %5.2f  %s  %12.5f  %13.5f   %8.1f%%   %11.1f%%   %8.1e\n",

@@ -6,7 +6,8 @@
 #   J_latent    the latent loop's enclosed area, which is exactly ∮ p·dq of the decoded loop
 #               because the decoder is symplectic and globally defined on the plane
 #   gap         |J_latent - J_angular| / J_angular
-#   recon       relative L2 reconstruction error on that level set
+#   recon       relative reconstruction error of that level set, on its exact orbit sampled
+#               uniformly in time (reconstruction_error.jl)
 #   nested      whether this level's image lies wholly on one side of the level before it
 #   simple      whether the image is a Jordan curve
 #
@@ -47,9 +48,9 @@
 #    files without them hold the symplectic autoencoder at sympnet_upscale = 20)
 #   SAE_NSAMP     1600             points per level set
 #
-# Needs GeometricMachineLearning 0.6 or newer and HDF5. It does NOT need PoincareInvariants,
-# CairoMakie or GeometricIntegrators: the invariant of a closed planar curve is its enclosed area,
-# which is a shoelace sum.
+# Needs GeometricMachineLearning 0.6 or newer, HDF5 and GeometricIntegrators (for the orbits of the
+# reconstruction error). It does NOT need PoincareInvariants or CairoMakie: the invariant of a closed
+# planar curve is its enclosed area, which is a shoelace sum.
 
 using GeometricMachineLearning, HDF5, Printf
 include(joinpath(@__DIR__, "structure_checks.jl"))
@@ -60,21 +61,12 @@ const NSAMP   = parse(Int, get(ENV, "SAE_NSAMP", "1600"))
 
 # Either autoencoder; the file says which (architectures.jl).
 include(joinpath(@__DIR__, "architectures.jl"))
+include(joinpath(@__DIR__, "reconstruction_error.jl"))
 const nn  = load_pendulum_network(weights)
 const enc = encoder(nn)
 const dec = decoder(nn)
 emb(θ, p) = embed(enc, θ, p)
 
-# A fixed number of sample points, not a stride, so the number is comparable between runs whatever
-# SAE_NSAMP is set to.
-sub(v) = v[round.(Int, range(1, length(v); length=min(200, length(v))))]
-function relerr(θ, p)
-    num = 0.0; den = 0.0
-    for (a,b) in zip(θ, p)
-        x = lift(a,b); r = dec(enc(x)); num += sum(abs2, r .- x); den += sum(abs2, x)
-    end
-    sqrt(num/den)
-end
 # --- the separatrix, which every limit is read against -------------------------------------------
 gm = emb(sepbranch(π/2,  3π/2, NSAMP)...)
 gp = emb(sepbranch(3π/2, 5π/2, NSAMP)...)
@@ -93,7 +85,7 @@ println("  rotating loop takes it in. Same sign means the layout has changed -- 
 println("  reading anything below.")
 
 "Print a family's table: the checks of `family_checks` with the action, its gap and the fit."
-function report(title, Hs, curve)
+function report(title, Hs, curve; sgn = -1)
     println()
     println(title)
     println("     H    J_angular    J_latent      gap     recon    simple   nested in the level below")
@@ -102,7 +94,7 @@ function report(title, Hs, curve)
     for (; H, θ, p, A, sc, frac) in rows
         Ja = angular(H)
         @printf("%7.3f %10.4f  %+10.4f  %7.1f%%  %6.1f%%     %-4s    %s\n",
-                H, Ja, A, 100abs(abs(A)-Ja)/Ja, 100relerr(sub(θ), sub(p)),
+                H, Ja, A, 100abs(abs(A)-Ja)/Ja, 100reconstruction_error(enc, dec, H; sgn).rel,
                 sc == 0 ? "yes" : "NO",
                 isnan(frac) ? "--" :
                     (frac in (0.0, 1.0) ? @sprintf("yes (%3.0f%% inside)", 100frac) :
@@ -116,7 +108,7 @@ lib = report("LIBRATING  (bounds a disk on the cylinder, so every chart must rep
 low = report("ROTATING, p_theta < 0  (the branch the base grid contains)",
              HROT, H -> rotating(H, NSAMP; sgn=-1))
 upp = report("ROTATING, p_theta > 0  (absent from the base grid; present if SAE_FRACS=both)",
-             HROT, H -> rotating(H, NSAMP; sgn=+1))
+             HROT, H -> rotating(H, NSAMP; sgn=+1); sgn = +1)
 
 verdict(name, d) = begin
     bad = [(k, v) for (k, v) in d if v !== nothing]

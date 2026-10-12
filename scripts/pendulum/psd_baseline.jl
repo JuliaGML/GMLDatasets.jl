@@ -9,7 +9,8 @@
 #   latent      ∮ p dq of the latent loop A⁺x, which equals ∮ p·dq of the decoded loop because A is
 #               symplectic -- checked in the last column
 #   gap         |latent - action| / action
-#   recon       relative L2 reconstruction error ‖AA⁺x - x‖ / ‖x‖ on the level set
+#   recon       relative reconstruction error of the level set, ‖AA⁺x - x‖ against ‖x‖ in the
+#               root-mean-square over the exact orbit sampled uniformly in time (reconstruction_error.jl)
 #
 # The data set is the base grid as the paper's run integrated it, not as `train_sae.jl` does: ten
 # angles in [π - 5/2, π - 3/20], the eight momentum fractions {0, ±2/5, ±3/4, -1, -2, -3} of the
@@ -66,21 +67,14 @@ function level_set(H; n)
     end
 end
 
+include(joinpath(@__DIR__, "reconstruction_error.jl"))
+
 pinv2(Z) = compute!(CanonicalFirstPI{Float64, 2}(length(Z)), Matrix(reduce(hcat, Z)'))
 pinv4(X) = compute!(CanonicalFirstPI{Float64, 4}(length(X)), Matrix(reduce(hcat, X)'))
 
-function relerr(θs, pθs)
-    num = 0.0; den = 0.0
-    for (a, b) in zip(θs, pθs)
-        x = lift(a, b); r = dec(enc(x))
-        num += sum(abs2, r .- x); den += sum(abs2, x)
-    end
-    sqrt(num / den)
-end
-
 function table(title, Hs; n = 16_000)
     println("\n", title)
-    println("      H   regime    action ∮pθdθ   latent ∮p dq   action gap   recon (rel L2)   sympl.")
+    println("      H   regime    action ∮pθdθ   latent ∮p dq   action gap     recon e_rec    sympl.")
     println("  " * "─"^90)
     gaps = Float64[]; recs = Float64[]
     for H in Hs
@@ -89,7 +83,7 @@ function table(title, Hs; n = 16_000)
         X = [lift(a, b) for (a, b) in zip(θs, pθs)]
         Z = [enc(x) for x in X]
         latent = abs(pinv2(Z)); decoded = abs(pinv4([dec(z) for z in Z]))
-        gap = abs(latent - action) / action; rec = relerr(θs[1:8:end], pθs[1:8:end])
+        gap = abs(latent - action) / action; rec = reconstruction_error(enc, dec, H; T = Float64).rel
         push!(gaps, gap); push!(recs, rec)
         @printf("  %6.2f  %s  %12.5f  %13.5f   %8.1f%%   %11.1f%%   %8.1e\n",
             H, H < 1 ? "librate" : "rotate ", action, latent, 100gap, 100rec,
@@ -106,7 +100,7 @@ lib = H_levels .< 1
 @printf("  action gap:  librating %.1f%%-%.1f%%   rotating %.1f%%-%.1f%%\n",
     100minimum(gaps[lib]), 100maximum(gaps[lib]), 100minimum(gaps[.!lib]), 100maximum(gaps[.!lib]))
 
-# The rotating energies the training data actually cover, where the paper quotes the SAE at 9.5%-14%.
+# The rotating energies the training data actually cover.
 gc, rc = table("ROTATING, p_theta < 0, AT ENERGIES THE DATA COVER",
     [1.60, 1.75, 2.00, 2.50, 4.00, 8.00, 16.91])
 @printf("\n  recon:       %.1f%%-%.1f%%   action gap: %.1f%%-%.1f%%\n",
