@@ -1,7 +1,7 @@
 # The reference phase portrait beside the trained encoder's latent space
 #
-# Figure 6 of the symplectic-autoencoder paper. Both dynamical regimes, libration about theta = pi
-# and rotation, with the separatrix that divides them.
+# The encoded pendulum level sets of the symplectic-autoencoder paper. Both dynamical regimes,
+# libration about theta = pi and rotation, with the separatrix that divides them.
 #
 # The rotating branch drawn is the p_theta < 0 one, which is the branch the training set contains.
 # That is not cosmetic: drawn on the other branch the same weights give a picture in which the

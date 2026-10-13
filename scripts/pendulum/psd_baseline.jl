@@ -1,7 +1,7 @@
 # psd_baseline.jl — proper symplectic decomposition on the paper's pendulum data
 #
-# The linear baseline for Section 7.2.5 of the symplectic-autoencoder paper. `PSDArch(4, 2)` is the
-# cotangent-lift PSD of GeometricMachineLearning, A = diag(Φ, Φ) with Φ ∈ St(1, 2), and `solve!`
+# The linear baseline for the pendulum experiment of the symplectic-autoencoder paper.
+# `PSDArch(4, 2)` is the cotangent-lift PSD of GeometricMachineLearning, A = diag(Φ, Φ) with Φ ∈ St(1, 2), and `solve!`
 # fits it by SVD; no training is involved. It is evaluated on the same fifteen level sets and with
 # the same metrics as `latent_plot.jl` evaluates the SAE, so the two tables can be read side by side:
 #
@@ -93,7 +93,7 @@ function table(title, Hs; n = 16_000)
 end
 
 const H_levels = collect(range(-0.4, 1.4; length = 15))     # as in latent_plot.jl
-gaps, recs = table("THE PAPER'S FIFTEEN LEVEL SETS (Figure 6)", H_levels)
+gaps, recs = table("THE FIFTEEN LEVEL SETS OF latent_plot.jl", H_levels)
 lib = H_levels .< 1
 @printf("\n  recon:       librating %.1f%%-%.1f%%   rotating %.1f%%-%.1f%%\n",
     100minimum(recs[lib]), 100maximum(recs[lib]), 100minimum(recs[.!lib]), 100maximum(recs[.!lib]))
