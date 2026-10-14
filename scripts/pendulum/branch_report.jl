@@ -8,7 +8,8 @@
 #   gap         |J_latent - J_angular| / J_angular
 #   recon       relative reconstruction error of that level set, on its exact orbit sampled
 #               uniformly in time (reconstruction_error.jl)
-#   nested      whether this level's image lies wholly on one side of the level before it
+#   nested      whether this level's image lies inside the level before it, or contains it, in the
+#               same direction as the family's first pair (side by side is not nested)
 #   simple      whether the image is a Jordan curve
 #
 # Why per branch. Above the separatrix each energy carries two orbits, p_θ > 0 and p_θ < 0, and they
@@ -91,14 +92,15 @@ function report(title, Hs, curve; sgn = -1)
     println("     H    J_angular    J_latent      gap     recon    simple   nested in the level below")
     println("  " * "─"^94)
     rows, firstbad = family_checks(enc, Hs, curve)
-    for (; H, θ, p, A, sc, frac) in rows
+    i = findfirst(r -> r.nest in (:inward, :outward), rows); dir = i === nothing ? :none : rows[i].nest
+    for (; H, θ, p, A, sc, frac, nest) in rows
         Ja = angular(H)
         @printf("%7.3f %10.4f  %+10.4f  %7.1f%%  %6.1f%%     %-4s    %s\n",
                 H, Ja, A, 100abs(abs(A)-Ja)/Ja, 100reconstruction_error(enc, dec, H; sgn).rel,
                 sc == 0 ? "yes" : "NO",
                 isnan(frac) ? "--" :
-                    (frac in (0.0, 1.0) ? @sprintf("yes (%3.0f%% inside)", 100frac) :
-                                          @sprintf("NO  (%3.0f%% inside)", 100frac)))
+                    (nest == dir ? @sprintf("yes (%3.0f%% inside, %s)", 100frac, nest) :
+                                   @sprintf("NO  (%3.0f%% inside, %s)", 100frac, nest)))
     end
     firstbad
 end

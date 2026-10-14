@@ -68,7 +68,11 @@ const HROT = [1.001, 1.05, 1.14, 1.27, 1.40, 1.50, 1.60, 1.75, 1.90, 2.00, 2.50,
 Walk a family in order and check each level's image. `frac` is the fraction of this level's image
 inside the previous one: for an embedding every vertex of one curve lies on a single side of the
 other, so it must come out 0% or 100%. Anything between is a crossing, and two disjoint orbits
-with intersecting images is non-injectivity directly.
+with intersecting images is non-injectivity directly. Disjointness is not nesting, though: two images
+side by side also give 0%. So `nest` records the direction, `:inward` (this image inside the previous
+one, 100%), `:outward` (the previous image inside this one: 0%, and a vertex of the previous image has
+nonzero winding about this one) or `:none`, and the family is nested only if every level has the
+direction of the first. These are checks on sampled curves, evidence for an embedding, not a proof.
 
 The orientation a family is traversed with is a convention -- the librating loops come out negative
 here and the rotating ones positive -- so what an embedding forces is not a positive area but a
@@ -80,6 +84,7 @@ function family_checks(enc, Hs, curve)
     rows = []
     prev = nothing
     ref = nothing
+    dir = nothing   # the nesting direction of the family, set by its first pair
     firstbad = Dict{String, Union{Nothing, Float64}}(
         "sign" => nothing, "nested" => nothing, "simple" => nothing)
     for H in Hs
@@ -89,12 +94,16 @@ function family_checks(enc, Hs, curve)
         sc = self_crossings(M)
         frac = prev === nothing ? NaN :
                count(winding(prev, M[i, 1], M[i, 2]) != 0 for i in 1:size(M, 1)) / size(M, 1)
+        nest = isnan(frac) ? :first :
+               frac == 1.0 ? :inward :
+               frac == 0.0 && winding(M, prev[1, 1], prev[1, 2]) != 0 ? :outward : :none
         ref === nothing && (ref = sign(A))
+        dir === nothing && nest in (:inward, :outward) && (dir = nest)
         sign(A) != ref && firstbad["sign"] === nothing && (firstbad["sign"] = H)
         sc > 0 && firstbad["simple"] === nothing && (firstbad["simple"] = H)
-        !isnan(frac) && !(frac in (0.0, 1.0)) && firstbad["nested"] === nothing &&
+        nest != :first && nest != dir && firstbad["nested"] === nothing &&
             (firstbad["nested"] = H)
-        push!(rows, (; H, θ, p, A, sc, frac))
+        push!(rows, (; H, θ, p, A, sc, frac, nest))
         prev = M
     end
     rows, firstbad
