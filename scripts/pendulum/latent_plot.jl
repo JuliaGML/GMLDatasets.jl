@@ -91,7 +91,13 @@ println("  " * "─"^88)
         100minimum(gl),100maximum(gl),100minimum(gr),100maximum(gr))
 @printf("  symplecticity defect: max %.1e at N = %d\n\n", maximum(sy), NQUAD)
 
-let fig = Figure(size=(1220, 480), fontsize=25)
+const LIB = Makie.RGBf(0x3B/255,0x75/255,0xAF/255)
+const ROT = Makie.RGBf(0xC1/255,0x70/255,0x1E/255)
+const SEP = Makie.RGBf(0xB0/255,0x30/255,0x30/255)
+regime_color(H) = H<1 ? (0.3+0.7clamp((H+0.4)/1.4,0,1))*LIB+(0.7-0.7clamp((H+0.4)/1.4,0,1))*Makie.RGBf(1,1,1) :
+    (0.5+0.4clamp((H-1)/0.4,0,1))*ROT+(0.5-0.4clamp((H-1)/0.4,0,1))*Makie.RGBf(1,1,1)
+const REGIME_MAP = [regime_color(H) for H in range(-0.4,1.4;length=256)]
+let fig = Figure(size=(1220, 480), fontsize=27)
     # No axis titles: the caption says what each panel shows; the panels carry only the letters
     # (a) (angular coordinates) and (b) (the encoded level sets), below them.
     ax1 = Axis(fig[1,1]; xlabel=L"\theta \;\; \mathrm{(rad)}", ylabel=L"p_\theta",
@@ -104,16 +110,16 @@ let fig = Figure(size=(1220, 480), fontsize=25)
     cr = (minimum(H_levels), maximum(H_levels))
     for H in H_levels
         θs,pθs,_ = level_set(H)
-        lines!(ax1, θs, pθs; color=H, colormap=:viridis, colorrange=cr, linewidth=2.2)
+        lines!(ax1, θs, pθs; color=regime_color(H), linewidth=2.2)
         Z = encode(θs,pθs)
-        lines!(ax2, [z[1] for z in Z], [z[2] for z in Z]; color=H, colormap=:viridis, colorrange=cr, linewidth=2.2)
+        lines!(ax2, [z[1] for z in Z], [z[2] for z in Z]; color=regime_color(H), linewidth=2.2)
     end
     # The separatrix goes on top of the level sets, which otherwise hide it: the rotating images
     # run along γ₋ almost all the way round. Each branch is drawn on its own, ℓ₋ (pθ < 0) solid and
     # ℓ₊ (pθ > 0) dashed, over a white halo, and with them the point where they meet, the unstable
     # equilibrium: twice in angular coordinates (θ = 0 and θ = 2π, unlabelled), once in the latent
     # plane, where its encoded image is labelled P̄ (the bar marks images under the encoder).
-    sep = :red3
+    sep = SEP
     sepbranch(lo, hi) = (k = sqrt((1 + H_sep - 1e-12)/2); s = range(lo, hi; length=NPLOT);
         (π .+ 2 .* asin.(clamp.(k .* sin.(s), -1, 1)), 2 .* k .* cos.(s)))
     for ((θs, pθs), ls) in ((sepbranch(π/2, 3π/2), :solid), (sepbranch(-π/2, π/2), :dash))
@@ -133,7 +139,7 @@ let fig = Figure(size=(1220, 480), fontsize=25)
     text!(ax2, P[1], P[2]; text=L"\bar{P}", align=(:left, :center), offset=(12, 0), fontsize=25)
     Label(fig[2,1], "(a)"; fontsize=25, tellwidth=false)
     Label(fig[2,2], "(b)"; fontsize=25, tellwidth=false)
-    Colorbar(fig[1,3]; colormap=:viridis, colorrange=cr, label=L"H",
+    Colorbar(fig[1,3]; colormap=REGIME_MAP, colorrange=cr, label=L"H",
              ticks=[-0.4,0.0,0.5,1.0,1.4], labelsize=25)
     colgap!(fig.layout,1,55); colgap!(fig.layout,2,12)
     CairoMakie.save(outfile, fig; px_per_unit=2)
