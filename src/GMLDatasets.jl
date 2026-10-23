@@ -6,7 +6,7 @@ Dataset-backed demonstrations for `GeometricMachineLearning` and `GeometricOptim
 Both of those packages are libraries for scientific machine learning and neither should depend on an
 image-dataset package to document itself. Everything that does lives here: the
 [`MLDatasets`](https://github.com/JuliaML/MLDatasets.jl) glue, the MNIST and Fashion-MNIST
-demonstrations and the numerical experiment from [brantner2023generalizing](@cite).
+demonstrations and the numerical experiment from [Brantner:2023](@cite).
 
 The entry points are [`mnist_data_loader`](@ref) and [`fashion_mnist_data_loader`](@ref), which hand
 back a `GeometricMachineLearning.DataLoader` in the *time series* format a transformer wants:
