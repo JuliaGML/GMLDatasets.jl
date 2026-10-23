@@ -24,6 +24,13 @@ breaking release).
   and the README install command name `github.com/JuliaGML/GMLDatasets.jl`. GitHub redirects the
   old repository URL; it does not redirect the old documentation site.
 
+- **The documentation builds against the registered GeometricMachineLearning, not its `main`
+  branch.** `docs/Project.toml` no longer pins GML to `main` under `[sources]`; that pin was for the
+  time before 0.5 was registered. GML `main` has since removed `Optimizer` in favour of
+  `TrainingOptimizer` and `train!`, so the MNIST tutorial failed with
+  ``UndefVarError: `Optimizer` not defined``, while the package and its tests stay on GML 0.6–0.8.
+  The docs now resolve the same GML release as the package.
+
 - **`Pkg.test()` no longer runs the doctests.** `test/quality/doctests.jl` is now the group
   `doctests`, which an empty `ARGS` does not run; `Pkg.test(test_args = ["doctests"])` runs it. In
   CI the Doctests job stays their runner, so the test matrix no longer runs them a second time.
