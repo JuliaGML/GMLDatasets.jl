@@ -869,27 +869,27 @@ end
 # `mnist_cuda.jl` for why, and why a flat loss there is the experiment working rather than a
 # defect).
 #
-# `Adam` takes the *element type* of the parameters, not a learning rate, and it is not
-# converted the way `MomentumMethod` is, so `Adam(T)` is what dispatches to the `Float32`
-# cache. `scalar_moment_adam_method` is the shared `CompositeMethod` of
+# `Optimizer` converts a method to the element type of the parameters, so `Adam()` steps the
+# `Float32` cache. `scalar_moment_adam_method` is the shared `CompositeMethod` of
 # `scripts/revision/scalar_moment_adam.jl` — `ScalarMomentAdam` on the Stiefel leaves, ordinary
 # `Adam` on the Euclidean ones — which the pendulum trainer builds from the same call. Its
 # `second_moment` is the one entry that overrides the shared table, because which ‖·‖² the scalar
 # moment accumulates is an environment setting.
 const trainer_settings = Dict(
-    "geometric-adam-cayley" => (stiefel = true, learns = true, algorithm = Adam(T),
+    "geometric-adam-cayley" => (stiefel = true, learns = true, algorithm = Adam(),
         learning_rate = learning_rate),
     "scalar-moment-adam" => (stiefel = true, learns = true,
         algorithm = scalar_moment_adam_method(T;
             ambient_norm = scalar_moment_adam_ambient_norm),
         learning_rate = scalar_moment_adam_learning_rate,
         second_moment = scalar_moment_description(scalar_moment_adam_ambient_norm)),
-    "standard-adam" => (stiefel = false, learns = false, algorithm = Adam(T),
+    "standard-adam" => (stiefel = false, learns = false, algorithm = Adam(),
         learning_rate = learning_rate),
     "gradient" => (stiefel = true, learns = true, algorithm = GradientMethod(),
         learning_rate = learning_rate),
     "momentum" =>
-        (stiefel = true, learns = true, algorithm = MomentumMethod(momentum_coefficient),
+        (stiefel = true, learns = true,
+            algorithm = MomentumMethod(; α = momentum_coefficient),
             learning_rate = learning_rate)
 )
 
