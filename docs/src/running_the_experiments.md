@@ -42,7 +42,7 @@ Three of them put the attention projections on the Stiefel manifold and differ o
 with `Adam`**, compares something else: it is the **baseline**, the same network with the projections
 left unconstrained, and it is *expected* to sit at chance with a flat loss.
 
-That is the published result [brantner2023generalizing](@cite): the vision transformer with
+That is the published result [Brantner:2023](@cite): the vision transformer with
 unconstrained projections and none of the usual heuristics — layer normalization, dropout,
 regularization, pre-training — "is not able to learn much, as the error rate is stuck at around 1.34,
 which indicates a trivial prediction". With ``L = 16`` blocks and nothing normalizing between them
@@ -249,5 +249,5 @@ accuracy question: a few hundred steps are a few per cent of the schedule.
 Pages = ["running_the_experiments.md"]
 Canonical = false
 
-brantner2023generalizing
+Brantner:2023
 ```
