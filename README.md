@@ -9,7 +9,7 @@ Both of those packages are libraries for *scientific* machine learning and neith
 an image-dataset package to document itself. This package holds everything that does: the
 [MLDatasets](https://github.com/JuliaML/MLDatasets.jl) glue, the MNIST and Fashion-MNIST
 demonstrations, the numerical experiment from
-[brantner2023generalizing](https://arxiv.org/abs/2305.16901) that shows manifold optimization making
+[Brantner:2023](https://arxiv.org/abs/2305.16901) that shows manifold optimization making
 a vision transformer trainable at all, and a symplectically integrated pendulum data set for the
 autoencoders.
 

@@ -19,6 +19,19 @@ breaking release).
 
 ### Changed
 
+- **`Pkg.test()` no longer runs the doctests.** `test/quality/doctests.jl` is now the group
+  `doctests`, which an empty `ARGS` does not run; `Pkg.test(test_args = ["doctests"])` runs it. In
+  CI the Doctests job stays their runner, so the test matrix no longer runs them a second time.
+
+- **`test/docstrings.jl` moves to `test/integration/docstrings.jl`**, because the test convention
+  keeps a test file at the top level of `test/` only where it mirrors `src/<name>.jl`, and there is
+  no `src/docstrings.jl`. The file tests the docstring examples of `onehotbatch` and
+  `split_and_flatten`, both in `src/mnist_utils.jl`, but `test/mnist_utils.jl` already holds the
+  tests of that file. Its content and its `@safetestset` label are unchanged.
+
+- **CI uploads coverage from the `Julia 1 - ubuntu-latest` job instead of `Julia min`, and a test
+  job saves the Julia cache only when it succeeds.**
+
 - **The preprocessing figure of the MNIST tutorial is drawn with CairoMakie during the docs
   build**, in pure Julia. A `@setup` block of the tutorial includes
   `docs/src/mnist/mnist_visualization.jl` and saves one PNG per Documenter theme. The figure keeps

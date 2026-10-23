@@ -1,6 +1,6 @@
 # The Numerical Experiment on Homogeneous Spaces
 
-`GeometricOptimizers` generalizes Adam to homogeneous spaces; [Optimization on Homogeneous Spaces](https://juliagni.github.io/GeometricOptimizers.jl/latest/manifold_optimizers/) derives how. This page is the numerical evidence, reproducing [brantner2023generalizing](@cite).
+`GeometricOptimizers` generalizes Adam to homogeneous spaces; [Optimization on Homogeneous Spaces](https://juliagni.github.io/GeometricOptimizers.jl/latest/manifold_optimizers/) derives how. This page is the numerical evidence, reproducing [Brantner:2023](@cite).
 
 ## The numerical experiment
 
@@ -165,5 +165,5 @@ In absolute terms none of this matters at this length. After 500 epochs Adam is 
 Pages = ["homogeneous_spaces_experiment.md"]
 Canonical = false
 
-brantner2023generalizing
+Brantner:2023
 ```

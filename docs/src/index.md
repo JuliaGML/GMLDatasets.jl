@@ -11,7 +11,7 @@ Dataset-backed demonstrations for
 Both of those packages are libraries for *scientific* machine learning and neither should depend on
 an image-dataset package to document itself. This one does: it holds the
 [`MLDatasets`](https://github.com/JuliaML/MLDatasets.jl) glue, the MNIST and Fashion-MNIST
-demonstrations, the numerical experiment of [brantner2023generalizing](@cite) that shows manifold
+demonstrations, the numerical experiment of [Brantner:2023](@cite) that shows manifold
 optimization making a vision transformer trainable at all, and a symplectically integrated pendulum
 data set for the autoencoders.
 
