@@ -12,7 +12,9 @@ Resolve and instantiate the scripts environment before disconnecting from the ne
 julia --project=scripts -e 'using Pkg; Pkg.update(); Pkg.precompile()'
 ```
 
-`scripts/Project.toml` takes `GeometricMachineLearning` and `GeometricOptimizers` from `main`,
+`scripts/Project.toml` takes `GeometricMachineLearning` from `main` and `GeometricOptimizers`
+from the branch `composite-optimizer-method` of
+[`GeometricOptimizers.jl` PR #121](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/121),
 because the harness needs four things that are not in a release: the optimizer step observer and
 `PhaseTimer` of [`GeometricOptimizers.jl` PR #78](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/78);
 the backend fixes of [#79](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/79),
@@ -20,9 +22,10 @@ the backend fixes of [#79](https://github.com/JuliaGNI/GeometricOptimizers.jl/pu
 [#85](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/85); `CompositeMethod` and the seams
 that go with it, which is how the `scalar-moment-adam` baseline is assembled over a mixed parameter
 tree; and `scripts/retraction_records.jl`, the retraction benchmark, which lives beside the
-algorithms it measures. Use `Pkg.update` rather than `Pkg.instantiate` or `Pkg.resolve`: to
-`resolve` a `rev = "main"` source is a fixed pin, so it reports a stale commit as satisfiable and
-leaves the environment silently behind `main`.
+algorithms it measures. `CompositeMethod` is on the #121 branch and not on `main`; the source goes
+back to `main` when #121 merges. Use `Pkg.update` rather than `Pkg.instantiate` or `Pkg.resolve`:
+to `resolve` a branch source is a fixed pin, so it reports a stale commit as satisfiable and leaves
+the environment silently behind the branch.
 
 `Manifest.toml` is **not** tracked. A manifest pinning two moving branch commits goes stale the day
 after it is committed; every run bundle instead carries the manifest that run actually resolved,

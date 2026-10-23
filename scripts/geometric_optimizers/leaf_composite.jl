@@ -99,6 +99,9 @@ function LeafComposite(
     states = Vector{GeometricOptimizers.OptimizerState{T}}(undef, length(ps))
     for (i, x) in enumerate(parameter_values)
         x₀ = leaf_solution(x)
+        # an `Optimizer` takes one leaf's method, never a whole `CompositeMethod`
+        leaf_method = method isa GeometricOptimizers.CompositeMethod ?
+                      GeometricOptimizers.leafmethod(method, x) : method
 
         # the sentinel merit: O(leaf size), finite, NaN-reporting; it never enters a `Static` step,
         # it is what the NaN guard and the state's `f` read (see the file header)
@@ -109,10 +112,10 @@ function LeafComposite(
 
         G = GradientFunction{T}(F_leaf, ∇F_leaf!, length(x₀))
         problem = OptimizerProblem(F_leaf, ∇F_leaf!, x₀)
-        optimizers[i] = Optimizer(x₀, problem; algorithm = method,
+        optimizers[i] = Optimizer(x₀, problem; algorithm = leaf_method,
             linesearch = Static(T; α = learning_rate),
             gradient = G, retraction = Cayley(), observer = leaf_observer)
-        states[i] = OptimizerState(method, x₀)
+        states[i] = OptimizerState(leaf_method, x₀)
         initialize_state!(states[i])
     end
 

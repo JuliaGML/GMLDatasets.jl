@@ -81,6 +81,22 @@ breaking release).
 
 ### Changed
 
+- **The scripts environment and the revision harness run on GeometricOptimizers 0.9 and the
+  `TrainingOptimizer` of GeometricMachineLearning `main`.** The Scripts workflow failed to resolve,
+  because `scripts/Project.toml` bounded GeometricOptimizers to 0.8 while its `main` is 0.9; the bounds
+  are now GeometricOptimizers `"0.9"` and NeuralNetworkParameters `"0.5"`, which GML `main` needs.
+  `CompositeMethod`, which the `scalar-moment-adam` baseline is built from, is on the branch
+  `composite-optimizer-method` of GeometricOptimizers #121 and not on its `main`, so that branch is
+  the source of GeometricOptimizers until #121 merges.
+
+  The harness follows the 0.9 API. A method takes its element type from its coefficients, so
+  `Adam(T; …)`, `ScalarMomentAdam(T; …)` and `MomentumMethod(β)` become `Adam(; …)`,
+  `ScalarMomentAdam(; …)` and `MomentumMethod(; α = β)`, and `Adam()` serves a `Float32` set, which
+  `Optimizer` converts. `LeafComposite` gives each leaf's `Optimizer` the method `leafmethod` picks
+  for it, because an `Optimizer` takes no `CompositeMethod`. The pendulum trainer builds a
+  `TrainingOptimizer` on the network's parameters and trains with `train!`, at the configured rate
+  as before.
+
 - **The repository moves from the JuliaGNI organisation to JuliaGML.** The documentation now
   deploys to `https://JuliaGML.github.io/GMLDatasets.jl`, and the README badge links there. The
   source links of the documentation and the README install command name

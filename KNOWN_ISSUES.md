@@ -20,6 +20,22 @@
 - **kind:** upstream
 - **found:** issue #30, part M29 of the test-suite migration
 
+## Scripts
+
+### K4 · Six MNIST scripts outside the revision harness use the API that GeometricOptimizers 0.9 and GML `main` removed
+
+- **location:** `scripts/geometric_optimizers/mnist.jl:404`, `mnist_cuda.jl:828`, `mnist_metal.jl:569`,
+  `mnist_metal_short.jl:576`; `scripts/gml/transformer_mnist.jl:38`,
+  `scripts/gml/transformer_fashion_mnist.jl:38`
+- **evidence:** the four `geometric_optimizers` scripts call `Adam(T)` and
+  `MomentumMethod(momentum_coefficient)`; GeometricOptimizers 0.9 defines only `Adam(; β₁, β₂, δ)`
+  and `MomentumMethod(; α)`. The two `gml` scripts call `AdamOptimizer(T)`, `GradientOptimizer()`,
+  `MomentumOptimizer(T(0.5))` and `Optimizer(opt, nn; step_size)`, which GML `main` removed in
+  favour of `TrainingOptimizer` and `train!`. The scripts environment resolves both, so each script
+  stops at its first such call. The harness scripts are ported.
+- **kind:** defect
+- **found:** 2026-10-23, in the port of the revision harness to GeometricOptimizers 0.9
+
 ## Documentation
 
 ### K3 · The CHANGELOG states a narrower `GeometricMachineLearning` bound than `Project.toml` has
