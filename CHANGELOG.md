@@ -19,6 +19,11 @@ breaking release).
 
 ### Changed
 
+- **The repository moves from the JuliaGNI organisation to JuliaGML.** The documentation now
+  deploys to `https://JuliaGML.github.io/GMLDatasets.jl`, and its source links, the README badge
+  and the README install command name `github.com/JuliaGML/GMLDatasets.jl`. GitHub redirects the
+  old repository URL; it does not redirect the old documentation site.
+
 - **`Pkg.test()` no longer runs the doctests.** `test/quality/doctests.jl` is now the group
   `doctests`, which an empty `ARGS` does not run; `Pkg.test(test_args = ["doctests"])` runs it. In
   CI the Doctests job stays their runner, so the test matrix no longer runs them a second time.

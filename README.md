@@ -1,6 +1,6 @@
 # GMLDatasets
 
-[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaGNI.github.io/GMLDatasets.jl/latest/)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://JuliaGML.github.io/GMLDatasets.jl/latest/)
 
 Dataset-backed demonstrations for [GeometricMachineLearning](https://github.com/JuliaGNI/GeometricMachineLearning.jl)
 and [GeometricOptimizers](https://github.com/JuliaGNI/GeometricOptimizers.jl).
@@ -77,7 +77,7 @@ So until it does:
 ```julia
 using Pkg
 Pkg.develop(url = "https://github.com/JuliaGNI/GeometricMachineLearning.jl")
-Pkg.develop(url = "https://github.com/JuliaGNI/GMLDatasets.jl.git")
+Pkg.develop(url = "https://github.com/JuliaGML/GMLDatasets.jl.git")
 ```
 
 or, working from local checkouts side by side:
