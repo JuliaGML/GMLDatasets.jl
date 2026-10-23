@@ -34,7 +34,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 #
 # `GeometricMachineLearning` comes from `main` and `GeometricOptimizers` from the branch
 # `composite-optimizer-method` of GeometricOptimizers #121, rather than from the registry. The
-# harness needs four things that are not in a release:
+# harness needs four things, and the last two are in no release:
 #
 #   * the optimizer step observer and `PhaseTimer` (GeometricOptimizers #78), which the decomposed
 #     schema-v4 timings are measured through;

@@ -46,11 +46,11 @@ println("neural_network_parameters_version=", pkgversion(NeuralNetworkParameters
 #     hands `rgrad` an ambient gradient on the host, `∇L' * Y.A` is a CPU `gemm!` on a device
 #     pointer.
 #
-# The second is the property the harness needs, not the mechanism that currently provides it: a
-# temporary shim in `GeometricOptimizers` moves the gradient across today, and when
-# JuliaGNI/GeometricMachineLearning.jl#258 and JuliaGNI/AbstractNeuralNetworks.jl#39 close it will
-# arrive on the device to begin with. Either way this must hold, and a failure here says the
-# harness needs updating rather than that the check has expired.
+# The second does not hold with GeometricOptimizers 0.9: `rgrad` refuses the host gradient below
+# with `ArgumentError: mixed backends`, and the pullback hands it a host gradient until
+# JuliaGNI/GeometricMachineLearning.jl#258 and JuliaGNI/AbstractNeuralNetworks.jl#39 close. The
+# probe passes a host array on purpose, so it needs a device gradient from the pullback once those
+# close (K5 in `KNOWN_ISSUES.md`).
 if functional
     let Q = Matrix(qr!(randn(Float32, 4, 2)).Q)[:, 1:2], Y = StiefelManifold(CUDA.cu(Q)),
         ps = NetworkParameters((weight = Y,))
