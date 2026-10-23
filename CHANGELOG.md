@@ -20,9 +20,15 @@ breaking release).
 ### Changed
 
 - **The repository moves from the JuliaGNI organisation to JuliaGML.** The documentation now
-  deploys to `https://JuliaGML.github.io/GMLDatasets.jl`, and its source links, the README badge
-  and the README install command name `github.com/JuliaGML/GMLDatasets.jl`. GitHub redirects the
-  old repository URL; it does not redirect the old documentation site.
+  deploys to `https://JuliaGML.github.io/GMLDatasets.jl`, and the README badge links there. The
+  source links of the documentation and the README install command name
+  `github.com/JuliaGML/GMLDatasets.jl`. GitHub redirects the old repository URL; it does not
+  redirect the old documentation site.
+
+- **The README install instructions no longer develop `GeometricMachineLearning` from `main`.** They
+  install GMLDatasets from its repository and let GML resolve from the registry. The paragraph
+  described a `[sources]` pin that `Project.toml` no longer has, and GML `main` no longer has the
+  `Optimizer` API that the tests and the MNIST tutorial use.
 
 - **The documentation builds against the registered GeometricMachineLearning, not its `main`
   branch.** `docs/Project.toml` no longer pins GML to `main` under `[sources]`; that pin was for the

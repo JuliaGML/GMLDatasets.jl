@@ -67,16 +67,11 @@ GPU nor a rerun.
 
 ## Installation
 
-Not registered, and it needs `GeometricMachineLearning` at `0.5`, which is not tagged yet — the
-newest registered version still defines `split_and_flatten` and `onehotbatch` itself and would
-collide with this package. That is also why Julia **1.11** is the floor: `Project.toml` pins
-`GeometricMachineLearning` to `main` through a `[sources]` block, which is a 1.11 feature, and Pkg
-1.10 ignores it and resolves to the registered 0.4.8 instead. Both go back to 1.10 when `0.5` lands.
-So until it does:
+Not registered, so install it from its repository. `GeometricMachineLearning` and the other
+dependencies resolve from the registry:
 
 ```julia
 using Pkg
-Pkg.develop(url = "https://github.com/JuliaGNI/GeometricMachineLearning.jl")
 Pkg.develop(url = "https://github.com/JuliaGML/GMLDatasets.jl.git")
 ```
 
