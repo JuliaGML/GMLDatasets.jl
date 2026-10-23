@@ -16,7 +16,7 @@ There are two keyword arguments:
 
 MNIST images are of size ``28\times28``. For `patch_length = 7` such an image is therefore split into
 16 patches of ``7\times7``, i.e. it becomes a matrix in ``\mathbb{R}^{49\times16}``
-[brantner2023generalizing](@cite).
+[Brantner:2023](@cite).
 
 # Implementation
 
