@@ -53,11 +53,11 @@ makedocs(;
     plugins = [bib, links],
     modules = [GMLDatasets],
     authors = "Michael Kraus",
-    repo = "https://github.com/JuliaGNI/GMLDatasets.jl/blob/{commit}{path}#{line}",
+    repo = "https://github.com/JuliaGML/GMLDatasets.jl/blob/{commit}{path}#{line}",
     sitename = "GMLDatasets.jl",
     format = Documenter.HTML(;
         prettyurls = get(ENV, "CI", "false") == "true",
-        canonical = "https://JuliaGNI.github.io/GMLDatasets.jl",
+        canonical = "https://JuliaGML.github.io/GMLDatasets.jl",
         edit_link = "main",
         assets = String[]
     ),
@@ -72,7 +72,7 @@ makedocs(;
 )
 
 deploydocs(;
-    repo = "github.com/JuliaGNI/GMLDatasets.jl",
+    repo = "github.com/JuliaGML/GMLDatasets.jl",
     devurl = "latest",
     devbranch = "main"
 )
