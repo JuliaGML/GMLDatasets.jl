@@ -199,6 +199,11 @@ breaking release).
   Project.toml at 0.7.0, so `Pkg.test()` stopped on an empty intersection between the manifest and
   the test environment. It failed the same way on `main` before the raise.
 
+- **The `GeometricMachineLearning` lower bound rises from `0.6` to `0.6.1`.** `GeometricMachineLearning`
+  is `"0.6.1, 0.7, 0.8"` now. With the `AbstractNeuralNetworks` bound at 0.7.2, the
+  `Downgrade` job resolved the root at `GeometricMachineLearning` 0.6.1 and named 0.6.0 as
+  unreachable.
+
 ### Removed
 
 - **The TikZ sources of the MNIST figure**: `docs/src/mnist/Makefile`, `final_image.tex`,
