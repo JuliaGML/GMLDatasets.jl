@@ -26,7 +26,7 @@ using Test
 using Random
 using LinearAlgebra: norm
 using GeometricOptimizers
-using GeometricOptimizers: cache, section
+using GeometricOptimizers: cache, check, gradient, section
 using NeuralNetworkParameters: NetworkParameters, flatlength, parameterlayout
 
 include(joinpath(@__DIR__, "step_timing.jl"))

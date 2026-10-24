@@ -12,17 +12,20 @@ Resolve and instantiate the scripts environment before disconnecting from the ne
 julia --project=scripts -e 'using Pkg; Pkg.update(); Pkg.precompile()'
 ```
 
-`scripts/Project.toml` takes `GeometricMachineLearning` and `GeometricOptimizers` from `main`,
-because the harness needs four things that are not in a release: the optimizer step observer and
-`PhaseTimer` of [`GeometricOptimizers.jl` PR #78](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/78);
+`scripts/Project.toml` takes `GeometricMachineLearning` from `main` and `GeometricOptimizers`
+from the branch `composite-optimizer-method` of
+[`GeometricOptimizers.jl` PR #121](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/121),
+because the harness needs four things, and the last two are in no release: the optimizer step
+observer and `PhaseTimer` of [`GeometricOptimizers.jl` PR #78](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/78);
 the backend fixes of [#79](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/79),
 [#84](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/84) and
 [#85](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/85); `CompositeMethod` and the seams
 that go with it, which is how the `scalar-moment-adam` baseline is assembled over a mixed parameter
 tree; and `scripts/retraction_records.jl`, the retraction benchmark, which lives beside the
-algorithms it measures. Use `Pkg.update` rather than `Pkg.instantiate` or `Pkg.resolve`: to
-`resolve` a `rev = "main"` source is a fixed pin, so it reports a stale commit as satisfiable and
-leaves the environment silently behind `main`.
+algorithms it measures. `CompositeMethod` is on the #121 branch and not on `main`; the source goes
+back to `main` when #121 merges. Use `Pkg.update` rather than `Pkg.instantiate` or `Pkg.resolve`:
+to `resolve` a branch source is a fixed pin, so it reports a stale commit as satisfiable and leaves
+the environment silently behind the branch.
 
 `Manifest.toml` is **not** tracked. A manifest pinning two moving branch commits goes stale the day
 after it is committed; every run bundle instead carries the manifest that run actually resolved,
@@ -31,13 +34,13 @@ under `environments/scripts/`, which is the copy a result has to be reproduced f
 Two of those upstream fixes are what the environment preflight probes, because no version number
 can express them: that an optimizer cache and state can be built for a parameter set living on the
 GPU, and that the Riemannian gradient of a device-resident point lands on the device. Both once
-cost a run its pendulum stage after the image stages had already succeeded. The second is currently
-provided by a **temporary** shim in `GeometricOptimizers` for a defect in the packages that produce
-the gradient — [`GeometricMachineLearning` #258](https://github.com/JuliaGNI/GeometricMachineLearning.jl/issues/258)
+cost a run its pendulum stage after the image stages had already succeeded. **The second does not
+hold today:** the gradient arrives on the host, for a defect in the packages that produce it —
+[`GeometricMachineLearning` #258](https://github.com/JuliaGNI/GeometricMachineLearning.jl/issues/258)
 and [`AbstractNeuralNetworks` #39](https://github.com/JuliaGNI/AbstractNeuralNetworks.jl/issues/39) —
-which moves the gradient across per manifold leaf per step, inside the region the phase timer
-attributes to the step. **A pendulum timing published from a run on that shim is an upper bound
-rather than a measurement.** The image stages never take this path and are unaffected.
+and `GeometricOptimizers` 0.9 refuses a host gradient at a device point. On a CUDA host the
+preflight therefore stops, and the pendulum stage cannot run, until those are fixed (K5 in
+`KNOWN_ISSUES.md`). The image stages never take this path and are unaffected.
 
 The pendulum trainer records end-to-end time, host allocation, and GC time, but does not yet emit
 the image trainer's decomposed phase-timing fields. It must therefore not be used for a pendulum
