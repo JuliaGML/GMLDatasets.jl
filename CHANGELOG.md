@@ -190,6 +190,11 @@ breaking release).
   to the newer versions above instead, so the old floors advertised versions that the dependency
   graph cannot select. The upper bounds are unchanged.
 
+- **Julia 1.12 is the floor** (`[compat] julia = "1.12"`, from 1.11). A caller on Julia 1.11 can
+  no longer install this version. Both `Project.toml` and `scripts/Project.toml` carry the new
+  bound. The package and its scripts had no version-conditional code, so nothing was deleted; the
+  `[sources]` blocks stay, because they are a Julia 1.11 feature that 1.12 also supports.
+
 ### Removed
 
 - **The TikZ sources of the MNIST figure**: `docs/src/mnist/Makefile`, `final_image.tex`,
