@@ -193,6 +193,12 @@ breaking release).
 - **Julia 1.12 is the floor** (`[compat] julia = "1.12"`, from 1.11), in both `Project.toml` and
   `scripts/Project.toml`. A caller on Julia 1.11 can no longer install this version.
 
+- **The `AbstractNeuralNetworks` lower bound rises from `0.7` to `0.7.2`.** `test/Project.toml`
+  bounds `NeuralNetworkParameters` to `"0.2.2, 0.3"`, while `AbstractNeuralNetworks` 0.7.0 and
+  0.7.1 require `NeuralNetworkParameters` 0.1 and 0.2. The `Downgrade` job resolved the root
+  Project.toml at 0.7.0, so `Pkg.test()` stopped on an empty intersection between the manifest and
+  the test environment. It failed the same way on `main` before the raise.
+
 ### Removed
 
 - **The TikZ sources of the MNIST figure**: `docs/src/mnist/Makefile`, `final_image.tex`,
