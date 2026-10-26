@@ -1,6 +1,6 @@
 import GeometricProblems.Pendulum as Pendulum
 
-using GeometricEquations: HODEEnsemble
+using GeometricEquations: EnsembleProblem, equation
 using GeometricIntegrators: Gauss, integrate
 using GeometricSolutions: EnsembleSolution, GeometricSolution
 
@@ -110,12 +110,13 @@ This is the scale `pendulum`'s `momentum_fractions` measures against.
 """
 function separatrix_momentum(θ, parameters::NamedTuple = Pendulum.default_parameters())
     parameters.m * parameters.l *
-        sqrt(2 * parameters.g * parameters.l * (1 - cos(θ)))
+    sqrt(2 * parameters.g * parameters.l * (1 - cos(θ)))
 end
 
 # The curved counterpart of `GeometricProblems`' `_pode_samples`. `hodeensemble` only builds
-# Cartesian grids, so the ensemble is assembled here from the same pieces it uses: the pendulum's
-# vector fields and Hamiltonian, and one initial condition per (angle, fraction) pair.
+# Cartesian grids, so the ensemble is assembled here from the pieces it uses, through names that
+# package makes public: the pendulum's equation, which carries its vector fields and Hamiltonian,
+# and one initial condition per (angle, fraction) pair.
 function _separatrix_relative_ensemble(qmin, qmax, qsamples, fractions,
         parameters, timespan, timestep)
     length(qmin) == length(qmax) == length(qsamples) == 1 || throw(ArgumentError(
@@ -133,10 +134,10 @@ function _separatrix_relative_ensemble(qmin, qmax, qsamples, fractions,
         "is undefined there; the angle grid range($(qmin[1]), $(qmax[1]); length = " *
         "$(qsamples[1])) contains such an angle"))
 
-    q₀ = [[θ] for θ in θs for _ in fractions]
-    p₀ = [[f * p] for p in psep for f in fractions]
-    HODEEnsemble(Pendulum.pendulum_pode_v, Pendulum.pendulum_pode_f, Pendulum.hamiltonian,
-        timespan, timestep, q₀, p₀; parameters = parameters)
+    equ = equation(Pendulum.hodeproblem(; parameters = parameters))
+    EnsembleProblem(equ, timespan, timestep,
+        [(q = [θ], p = [f * p]) for (θ, p) in zip(θs, psep) for f in fractions];
+        parameters = parameters)
 end
 
 @doc raw"""
