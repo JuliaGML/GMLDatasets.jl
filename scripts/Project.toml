@@ -32,9 +32,10 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 # `GMLDatasets` is not registered, so it is reached by path.
 #
-# `GeometricMachineLearning` and `GeometricOptimizers` come from `main` rather than from the
-# registry. The harness needs four things, all of which are in the registered `GeometricOptimizers`
-# 0.9.1, so the entry follows `main` rather than reaching for a version the registry lacks:
+# `GeometricMachineLearning` comes from `main` rather than from the registry: the registered 0.8.0
+# bounds `GeometricOptimizers` to `0.8` and `AbstractNeuralNetworks` to `0.8`, and the harness runs
+# on the 0.9 line of both. `GeometricOptimizers` itself comes from the registry, and `[compat]`
+# requires 0.9.1, the first release that carries everything this harness needs of it:
 #
 #   * the optimizer step observer and `PhaseTimer` (GeometricOptimizers #78), which the decomposed
 #     schema-v4 timings are measured through;
@@ -44,7 +45,11 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 #   * `scripts/retraction_records.jl`, the retraction benchmark, which lives beside the
 #     algorithms it measures and which this harness invokes rather than reimplements.
 #
-# `Manifest.toml` is not tracked — a manifest pinning two moving `main` commits goes stale the day
+# A source entry for `GeometricOptimizers` would make the versions every number depends on follow
+# `main` rather than a release, so there is none: `Pkg.status` and the run bundle's manifest say
+# which release a run used.
+#
+# `Manifest.toml` is not tracked — a manifest pinning a moving `main` commit goes stale the day
 # after it is committed, and the run bundle already carries the one a run actually resolved, under
 # `environments/scripts/`. Instantiate before a run, and refresh with `Pkg.update`, not
 # `Pkg.resolve`: a `rev = "main"` source is a fixed pin to `resolve`, which reports the stale commit
@@ -52,10 +57,9 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 [sources]
 GMLDatasets = {path = ".."}
 GeometricMachineLearning = {url = "https://github.com/JuliaGNI/GeometricMachineLearning.jl.git", rev = "main"}
-GeometricOptimizers = {url = "https://github.com/JuliaGNI/GeometricOptimizers.jl.git", rev = "main"}
 
 [compat]
 GeometricMachineLearning = "0.8"
-GeometricOptimizers = "0.9"
+GeometricOptimizers = "0.9.1"
 NeuralNetworkParameters = "0.5"
 julia = "1.12"

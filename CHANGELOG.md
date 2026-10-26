@@ -81,12 +81,16 @@ breaking release).
 
 ### Changed
 
-- **The scripts environment and the revision harness run on GeometricOptimizers 0.9 and the
+- **The scripts environment and the revision harness run on GeometricOptimizers 0.9.1 and the
   `TrainingOptimizer` of GeometricMachineLearning `main`.** The Scripts workflow failed to resolve,
-  because `scripts/Project.toml` bounded GeometricOptimizers to 0.8 while its `main` is 0.9; the bounds
-  are now GeometricOptimizers `"0.9"` and NeuralNetworkParameters `"0.5"`, which GML `main` needs.
-  `CompositeMethod`, which the `scalar-moment-adam` baseline is built from, is in the registered
-  GeometricOptimizers 0.9.1, so `scripts/Project.toml` keeps the source on `main`.
+  because `scripts/Project.toml` bounded GeometricOptimizers to 0.8 while the 0.9 line was what the
+  harness needs; the bounds are now GeometricOptimizers `"0.9.1"` and NeuralNetworkParameters
+  `"0.5"`, which GML `main` needs. `GeometricOptimizers` comes from the registry and names no
+  source: 0.9.1 is the first release that carries `CompositeMethod`, which the
+  `scalar-moment-adam` baseline is built from. `GeometricMachineLearning` stays on `main`, because
+  the registered 0.8.0 bounds `GeometricOptimizers` to `0.8`. An environment for a benchmark that
+  measures optimizer steps no longer follows a branch of the package it measures, so a number is
+  read back from the release the run bundle's manifest records.
 
   The harness follows the 0.9 API. A method takes its element type from its coefficients, so
   `Adam(T; …)`, `ScalarMomentAdam(T; …)` and `MomentumMethod(β)` become `Adam(; …)`,

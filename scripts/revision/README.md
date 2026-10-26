@@ -12,20 +12,23 @@ Resolve and instantiate the scripts environment before disconnecting from the ne
 julia --project=scripts -e 'using Pkg; Pkg.update(); Pkg.precompile()'
 ```
 
-`scripts/Project.toml` takes `GeometricMachineLearning` and `GeometricOptimizers` from `main`,
-not from the registry. The harness needs four things, all of which are in the registered
-`GeometricOptimizers` 0.9.1: the optimizer step observer and `PhaseTimer` of
+`scripts/Project.toml` takes `GeometricMachineLearning` from `main`, not from the registry: the
+registered 0.8.0 bounds `GeometricOptimizers` and `AbstractNeuralNetworks` to `0.8`, and the harness
+runs on the 0.9 line of both. `GeometricOptimizers` itself comes from the registry, and `[compat]`
+requires 0.9.1, the first release that carries the four things the harness needs of it: the
+optimizer step observer and `PhaseTimer` of
 [`GeometricOptimizers.jl` PR #78](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/78);
 the backend fixes of [#79](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/79),
 [#84](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/84) and
 [#85](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/85); `CompositeMethod` and the seams
 that go with it, which is how the `scalar-moment-adam` baseline is assembled over a mixed parameter
 tree; and `scripts/retraction_records.jl`, the retraction benchmark, which lives beside the
-algorithms it measures. Use `Pkg.update` rather than `Pkg.instantiate` or `Pkg.resolve`: to
-`resolve` a `rev = "main"` source is a fixed pin, so it reports a stale commit as satisfiable and
-leaves the environment silently behind `main`.
+algorithms it measures. A run's own bundle records the manifest it resolved, so the optimizer
+version behind a number is read from there. Use `Pkg.update` rather than `Pkg.instantiate` or
+`Pkg.resolve`: to `resolve` a `rev = "main"` source is a fixed pin, so it reports a stale commit as
+satisfiable and leaves the environment silently behind `main`.
 
-`Manifest.toml` is **not** tracked. A manifest pinning two moving `main` commits goes stale the day
+`Manifest.toml` is **not** tracked. A manifest pinning a moving `main` commit goes stale the day
 after it is committed; every run bundle instead carries the manifest that run actually resolved,
 under `environments/scripts/`, which is the copy a result has to be reproduced from.
 
