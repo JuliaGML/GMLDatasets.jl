@@ -7,7 +7,8 @@
 #
 # Two of the harness's suites need `GeometricOptimizers` and run against `scripts/Project.toml`,
 # which is a different environment from the package's: it takes `GeometricMachineLearning` and
-# `GeometricOptimizers` from `main` and does not track a `Manifest.toml`. The other two need nothing
+# `GeometricOptimizers` from branches, not from the registry, and does not track a `Manifest.toml`
+# (`scripts/Project.toml` names the branches and why). The other two need nothing
 # but `SHA` and Base and run from `test/runtests.jl` instead, inside the package suite.
 #
 # NOT A REQUIRED CHECK. The environment resolves two moving branches on purpose, so this job can go

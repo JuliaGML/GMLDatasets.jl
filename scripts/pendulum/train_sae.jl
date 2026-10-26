@@ -106,7 +106,7 @@ function configuration(T::Type{<:AbstractFloat})
     key = only(selected)
     methods = Dict(
         "geometric-adam-cayley" => (learning_rate = T(LEARNING_RATE),
-            method = GeometricOptimizers.Adam(T;
+            method = GeometricOptimizers.Adam(;
                 β₁ = T(ADAM_BETA1), β₂ = T(ADAM_BETA2), δ = T(ADAM_EPSILON))),
         "scalar-moment-adam" => (learning_rate = T(SCALAR_MOMENT_LEARNING_RATE),
             method = scalar_moment_adam_method(T;
@@ -114,7 +114,7 @@ function configuration(T::Type{<:AbstractFloat})
         "gradient" => (learning_rate = T(LEARNING_RATE),
             method = GeometricOptimizers.GradientMethod()),
         "momentum" => (learning_rate = T(LEARNING_RATE),
-            method = GeometricOptimizers.MomentumMethod(T(MOMENTUM_COEFFICIENT)))
+            method = GeometricOptimizers.MomentumMethod(; α = T(MOMENTUM_COEFFICIENT)))
     )
     merge((key = key,), CONFIGURATIONS[key], methods[key])
 end
@@ -195,15 +195,16 @@ architecture = SymplecticAutoencoder(dl.input_dim, REDUCED_DIM;
     sympnet_upscale = 20)
 network = NeuralNetwork(architecture, backend, eltype(dl))
 selected = configuration(eltype(dl))
-# `step_size` and not the default. `Optimizer`'s default is a property of the *method* -- 1e-3 for
-# `Adam`, 1e-2 for the rest -- so without this the rate every run record quotes was a number the run
-# did not use, and the four configurations were not compared at the rates the comparison says they
-# were.
-optimizer = Optimizer(selected.method, network;
-    retraction = cayley, step_size = selected.learning_rate)
+# `linesearch` and not the default. The default step size is a property of the *method* -- 1e-3 for
+# `Adam`, 1e-2 for the rest -- so without this the rate every run record quotes would be a number the
+# run did not use, and the four configurations would not be compared at the rates the comparison says
+# they are.
+optimizer = TrainingOptimizer(network.params; algorithm = selected.method,
+    linesearch = selected.learning_rate, retraction = Cayley())
 
 CUDA.functional() && CUDA.synchronize()
-timed = @timed optimizer(network, dl, Batch(BATCH_SIZE), N_EPOCHS; show_progress = false)
+timed = @timed train!(
+    network, optimizer, dl, Batch(BATCH_SIZE), N_EPOCHS; show_progress = false)
 CUDA.functional() && CUDA.synchronize()
 losses = timed.value
 backend_name = CUDA.functional() ? "cuda" : "cpu"
