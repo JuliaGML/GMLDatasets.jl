@@ -76,17 +76,21 @@ breaking release).
   `GeometricOptimizers` against `scripts/Project.toml`. The other two need nothing but `SHA` and
   Base and run from `test/runtests.jl`, inside the package suite. `CI.yml` is byte-identical in
   every repository by policy and cannot gain a step; its own header prescribes this escape hatch.
-  Not a required check: the scripts environment resolves two moving branches on purpose, so the job
-  can go red for a change made upstream.
+  Not a required check: the scripts environment follows `GeometricMachineLearning`'s `main` on
+  purpose, so the job can go red for a change made upstream.
 
 ### Changed
 
-- **The scripts environment and the revision harness run on GeometricOptimizers 0.9 and the
+- **The scripts environment and the revision harness run on GeometricOptimizers 0.9.1 and the
   `TrainingOptimizer` of GeometricMachineLearning `main`.** The Scripts workflow failed to resolve,
-  because `scripts/Project.toml` bounded GeometricOptimizers to 0.8 while its `main` is 0.9; the bounds
-  are now GeometricOptimizers `"0.9"` and NeuralNetworkParameters `"0.5"`, which GML `main` needs.
-  `CompositeMethod`, which the `scalar-moment-adam` baseline is built from, is in the registered
-  GeometricOptimizers 0.9.1, so `scripts/Project.toml` keeps the source on `main`.
+  because `scripts/Project.toml` bounded GeometricOptimizers to 0.8 while the 0.9 line was what the
+  harness needs; the bounds are now GeometricOptimizers `"0.9.1"` and NeuralNetworkParameters
+  `"0.5"`, which GML `main` needs. `GeometricOptimizers` comes from the registry and names no
+  source: 0.9.1 is the first release that carries `CompositeMethod`, which the
+  `scalar-moment-adam` baseline is built from. `GeometricMachineLearning` stays on `main`, because
+  the registered 0.8.0 bounds `GeometricOptimizers` to `0.8`. An environment for a benchmark that
+  measures optimizer steps no longer follows a branch of the package it measures, so a number is
+  read back from the release the run bundle's manifest records.
 
   The harness follows the 0.9 API. A method takes its element type from its coefficients, so
   `Adam(T; …)`, `ScalarMomentAdam(T; …)` and `MomentumMethod(β)` become `Adam(; …)`,
@@ -161,14 +165,14 @@ breaking release).
   `Project.toml` (#30, an upstream fault). The new `test/quality/doctests.jl` runs
   `doctest(GMLDatasets)`, as the Doctests job of CI does. No JET file is added.
 
-- **The scripts environment resolves `GeometricMachineLearning` and `GeometricOptimizers` from
-  `main`, not from the registry**; `scripts/Project.toml` names the source. The harness needs the
-  optimizer step observer and `PhaseTimer` of
+- **The scripts environment resolves `GeometricMachineLearning` from `main`, not from the registry**;
+  `scripts/Project.toml` names the source. The harness needs the optimizer step observer and
+  `PhaseTimer` of
   [GeometricOptimizers #78](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/78), the backend
   fixes of [#79](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/79),
   [#84](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/84) and
   [#85](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/85), and the 0.8 seams above.
-  `scripts/Manifest.toml` stays untracked: a manifest pinning two moving `main` commits is stale the
+  `scripts/Manifest.toml` stays untracked: a manifest pinning a moving `main` commit is stale the
   day after it is committed, and every run bundle already carries the manifest that run resolved.
   Refresh with `Pkg.update`, never `Pkg.resolve` — to `resolve` a `rev = "main"` source is a fixed
   pin, so it calls a stale commit satisfiable and leaves the environment silently behind.
