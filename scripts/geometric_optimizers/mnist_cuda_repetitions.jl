@@ -719,7 +719,10 @@ A non-finite epoch loss ends the run: the parameters cannot come back from it, a
 of noticing here is not to spend the remaining epochs proving that.
 """
 function train(
-        stiefel::Bool, algorithm::GeometricOptimizers.OptimizerMethod, input, output,
+        stiefel::Bool,
+        algorithm::Union{
+            GeometricOptimizers.OptimizerMethod, GeometricOptimizers.CompositeMethod},
+        input, output,
         test_input, test_output; label::AbstractString, run_index::Integer, run_name::AbstractString,
         repetition::Integer, seed::Integer = seed, n_epochs = n_epochs,
         learning_rate = learning_rate)
