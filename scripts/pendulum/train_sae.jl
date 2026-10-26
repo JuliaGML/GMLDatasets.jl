@@ -13,6 +13,27 @@
 # `scripts/revision/run_experiments.sh` supplies the configuration, seed,
 # checkpoint, and CSV paths for the full paired matrix. The script remains
 # useful on its own: it defaults to geometric Adam and writes one HDF5 file.
+#
+# The grid is separatrix-relative rather than Cartesian, because what this experiment is about is
+# the crossing, and a rectangle in (θ, pθ) cannot control how close to the separatrix the data
+# comes: a fixed pθ crosses it as θ varies. A momentum fraction f does control it — |f| < 1
+# librates and |f| > 1 rotates at every angle — so the crossing is covered as densely as one likes.
+#
+# The fractions below are the ones used for the paper's figure, with two gaps closed.
+#
+# Rotating: the paper's set jumped from f = -1 straight to f = -2, which leaves H ∈ (1, 1.60)
+# empty — every rotating orbit nearest the separatrix, and so every rotating number the figure
+# reports, was an extrapolation across that band. Six fractions between 1 and 2 close it.
+#
+# Librating: f = 3/4 was the closest approach to the separatrix from below, reaching H = 0.913,
+# so the band H ∈ (0.913, 1) was empty too. `timespan` widens with the grid, because a librating
+# orbit's period is 4K(√((1+H)/2)) and diverges at the separatrix: at f = 3/4 it is already 11.9,
+# so over (0, 40) every trajectory here closes at least twice, apart from f = -1, which is the
+# separatrix itself and has no period at all.
+#
+# Only one direction of rotation is sampled. That is deliberate and not an oversight: a symmetric
+# grid puts both directions in the data, and a planar latent space cannot nest both of them outside
+# the separatrix image, so one direction has to be folded inside it. See #26.
 
 using CUDA
 using GeometricMachineLearning
@@ -20,7 +41,7 @@ using Random
 using Printf
 
 import AbstractNeuralNetworks: save
-import GMLDatasets: angular_to_euclidean, pendulum
+import GMLDatasets: angular_to_euclidean, pendulum, pendulum_energy
 import HDF5
 import GeometricOptimizers
 
@@ -32,6 +53,20 @@ using .RunRecords
 
 # The `scalar-moment-adam` method, which the image trainer builds from the same call.
 include(joinpath(@__DIR__, "..", "revision", "scalar_moment_adam.jl"))
+
+# Ten angles between the stable and the unstable equilibrium, times nineteen momentum fractions.
+# Negative fractions of modulus above one are the rotating trajectories; |f| = 1 is the separatrix.
+const angle_range = ([π - 5 / 2], [π - 3 / 20])
+const angle_samples = [10]
+const momentum_fractions = [0, 2 / 5, -2 / 5, 3 / 4, -3 / 4,             # librating
+    9 / 10, -9 / 10, 19 / 20, -19 / 20,          # librating, up against the separatrix
+    -1,                                          # the separatrix itself
+    -1.02, -1.05, -1.1, -1.2, -1.4, -1.6,        # the band the paper's grid left empty
+    -2, -5 / 2, -3]                              # the rotating trajectories it did have
+
+# Long enough for the slowest orbit in the grid — f = 19/20, period 14.8 — to close more than twice.
+const timespan = (0.0, 40.0)
+const timestep = 0.1
 
 const REDUCED_DIM = parse(Int, get(ENV, "SAE_REDUCED_DIM", "2"))
 const N_EPOCHS = parse(Int, get(ENV, "SAE_N_EPOCHS", "1000"))
@@ -135,7 +170,13 @@ REQUIRE_CUDA && !CUDA.functional() &&
     error("SAE_REQUIRE_CUDA=1 but CUDA.functional() is false")
 backend, to_device = CUDA.functional() ? (CUDABackend(), cu) : (CPU(), identity)
 
-solution = pendulum()
+solution = pendulum(;
+    qmin = angle_range[1], qmax = angle_range[2], qsamples = angle_samples,
+    momentum_fractions = momentum_fractions, timespan = timespan, timestep = timestep)
+
+energies = pendulum_energy(solution)[1, :]
+println("$(length(solution)) trajectories, H ∈ [",
+    round(minimum(energies); digits = 3), ", ", round(maximum(energies); digits = 3), "]")
 data = to_device(Float32.(angular_to_euclidean(solution)))
 dl = DataLoader(data; autoencoder = true, suppress_info = true)
 

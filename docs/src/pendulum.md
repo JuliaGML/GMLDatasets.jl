@@ -48,8 +48,10 @@ solution = pendulum()
 That is a hundred trajectories of a hundred and one time steps each, spread over
 ``\theta \in [0, 2\pi]`` and ``p_\theta \in [-2, 2]`` — the grid `GeometricProblems` itself uses,
 which covers both libration and rotation. The keyword arguments are the six grid bounds, the
-physical `parameters`, the `timespan` and `timestep`, and the `integrator`. The default integrator
-is two-stage Gauss collocation, which is symplectic.
+physical `parameters`, the `timespan` and `timestep`, the `integrator`, and `momentum_fractions`,
+which replaces the momentum grid with one scaled to the separatrix at each angle (see
+[`separatrix_momentum`](@ref)). The default integrator is two-stage Gauss collocation, which is
+symplectic.
 
 ## The lift into four dimensions
 
@@ -102,9 +104,9 @@ training run; `scripts/pendulum/train_sae.jl` is a complete one.
     real-valued coordinates because ``\theta`` is periodic. That does **not** prevent an SAE from
     finding a different two-dimensional representation of a bounded part of the cylinder. For
     example, it can represent the angular direction by an annular geometry in its latent plane.
-    `scripts/pendulum/train_sae.jl` therefore trains on the default bounded grid, which contains both
-    librating and rotating trajectories and crosses the separatrix. The learned coordinates need not
-    resemble ``(\theta, p_\theta)`` to represent those trajectories faithfully.
+    `scripts/pendulum/train_sae.jl` therefore trains on a grid sampled relative to the separatrix,
+    which contains both librating and rotating trajectories and crosses it. The learned coordinates
+    need not resemble ``(\theta, p_\theta)`` to represent those trajectories faithfully.
 
 ## Checking the integrator
 
