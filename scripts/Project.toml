@@ -51,9 +51,12 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 #
 # `Manifest.toml` is not tracked — a manifest pinning a moving `main` commit goes stale the day
 # after it is committed, and the run bundle already carries the one a run actually resolved, under
-# `environments/scripts/`. Instantiate before a run, and refresh with `Pkg.update`, not
-# `Pkg.resolve`: a `rev = "main"` source is a fixed pin to `resolve`, which reports the stale commit
-# as satisfiable and leaves the environment behind `main` without saying so.
+# `environments/scripts/`. Delete it whenever this `[sources]` block changes: an entry written while
+# a source was named here keeps a `repo-url` and a `repo-rev`, and Pkg falls back to them where the
+# project names no source, so `Pkg.update` would keep that commit and write the entry back into this
+# file. Instantiate before a run, and refresh with `Pkg.update`, not `Pkg.resolve`: a `rev = "main"`
+# source is a fixed pin to `resolve`, which reports the stale commit as satisfiable and leaves the
+# environment behind `main` without saying so.
 [sources]
 GMLDatasets = {path = ".."}
 GeometricMachineLearning = {url = "https://github.com/JuliaGNI/GeometricMachineLearning.jl.git", rev = "main"}

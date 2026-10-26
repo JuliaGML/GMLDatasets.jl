@@ -9,8 +9,16 @@ and always packages the partial or complete directory as a `.tar.gz` plus SHA-25
 Resolve and instantiate the scripts environment before disconnecting from the network:
 
 ```bash
+rm -f scripts/Manifest.toml
 julia --project=scripts -e 'using Pkg; Pkg.update(); Pkg.precompile()'
 ```
+
+The `rm` is not redundant. `Manifest.toml` is untracked, and one written while `Project.toml` still
+named a `GeometricOptimizers` source keeps that entry as `repo-url`/`repo-rev`. When the project
+names no source, `Pkg` falls back to the manifest's, so `Pkg.update` would keep the old repository
+commit **and** write the source back into `Project.toml`. A manifest from before the move to the
+registry therefore has to go, and `git diff scripts/Project.toml` after a resolve says whether one
+survived.
 
 `scripts/Project.toml` takes `GeometricMachineLearning` from `main`, not from the registry: the
 registered 0.8.0 bounds `GeometricOptimizers` and `AbstractNeuralNetworks` to `0.8`, and the harness
