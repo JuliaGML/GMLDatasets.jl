@@ -58,13 +58,13 @@ breaking release).
 
   **Two gaps, both deliberate.** The pendulum trainer records end-to-end time, host allocation and
   GC time but *not* the decomposed phase timings, so it cannot carry a direction/retraction cost
-  claim yet. And the Riemannian gradient of a device-resident point currently reaches the device
-  through a **temporary shim** in `GeometricOptimizers`, for a defect in the packages that produce
-  the gradient ([`GeometricMachineLearning` #258](https://github.com/JuliaGNI/GeometricMachineLearning.jl/issues/258),
-  [`AbstractNeuralNetworks` #39](https://github.com/JuliaGNI/AbstractNeuralNetworks.jl/issues/39)).
-  That shim moves the gradient across per manifold leaf per step, inside the region the phase timer
-  attributes to the step, so **a pendulum timing published from a run carrying it is an upper bound
-  rather than a measurement.** The image stages never take that path and are unaffected.
+  claim yet. And the Riemannian gradient of a device-resident point arrives on the host, for a
+  defect in the packages that produce the gradient
+  ([`GeometricMachineLearning` #258](https://github.com/JuliaGNI/GeometricMachineLearning.jl/issues/258),
+  [`AbstractNeuralNetworks` #39](https://github.com/JuliaGNI/AbstractNeuralNetworks.jl/issues/39)),
+  and GeometricOptimizers 0.9 refuses a host gradient at a device point, so the pendulum stage and
+  the environment preflight do not run on a CUDA host until those are fixed (`KNOWN_ISSUES.md`,
+  K5). The image stages never take that path and are unaffected.
 
 - **`scripts/revision/capture_source.jl`**, the harness's one provenance capture: a repository's
   commit, a reproducible patch that includes untracked files, the patch's SHA-256, and a cross-check
@@ -80,6 +80,21 @@ breaking release).
   can go red for a change made upstream.
 
 ### Changed
+
+- **The scripts environment and the revision harness run on GeometricOptimizers 0.9 and the
+  `TrainingOptimizer` of GeometricMachineLearning `main`.** The Scripts workflow failed to resolve,
+  because `scripts/Project.toml` bounded GeometricOptimizers to 0.8 while its `main` is 0.9; the bounds
+  are now GeometricOptimizers `"0.9"` and NeuralNetworkParameters `"0.5"`, which GML `main` needs.
+  `CompositeMethod`, which the `scalar-moment-adam` baseline is built from, is in the registered
+  GeometricOptimizers 0.9.1, so `scripts/Project.toml` keeps the source on `main`.
+
+  The harness follows the 0.9 API. A method takes its element type from its coefficients, so
+  `Adam(T; …)`, `ScalarMomentAdam(T; …)` and `MomentumMethod(β)` become `Adam(; …)`,
+  `ScalarMomentAdam(; …)` and `MomentumMethod(; α = β)`, and `Adam()` serves a `Float32` set, which
+  `Optimizer` converts. `LeafComposite` gives each leaf's `Optimizer` the method `leafmethod` picks
+  for it, because an `Optimizer` takes no `CompositeMethod`. The pendulum trainer builds a
+  `TrainingOptimizer` on the network's parameters and trains with `train!`, at the configured rate
+  as before.
 
 - **The repository moves from the JuliaGNI organisation to JuliaGML.** The documentation now
   deploys to `https://JuliaGML.github.io/GMLDatasets.jl`, and the README badge links there. The
@@ -147,12 +162,13 @@ breaking release).
   `doctest(GMLDatasets)`, as the Doctests job of CI does. No JET file is added.
 
 - **The scripts environment resolves `GeometricMachineLearning` and `GeometricOptimizers` from
-  `main`.** The harness needs the optimizer step observer and `PhaseTimer` of
+  `main`, not from the registry**; `scripts/Project.toml` names the source. The harness needs the
+  optimizer step observer and `PhaseTimer` of
   [GeometricOptimizers #78](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/78), the backend
   fixes of [#79](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/79),
   [#84](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/84) and
   [#85](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/85), and the 0.8 seams above.
-  `scripts/Manifest.toml` stays untracked: a manifest pinning two moving branch commits is stale the
+  `scripts/Manifest.toml` stays untracked: a manifest pinning two moving `main` commits is stale the
   day after it is committed, and every run bundle already carries the manifest that run resolved.
   Refresh with `Pkg.update`, never `Pkg.resolve` — to `resolve` a `rev = "main"` source is a fixed
   pin, so it calls a stale commit satisfiable and leaves the environment silently behind.
@@ -162,9 +178,8 @@ breaking release).
   on the GPU, and that the Riemannian gradient of a device-resident point lands on the device. Both
   once cost a run its pendulum stage after the image stages had already spent their hours — the
   image trainer keeps its parameters in a **host** container and copies to the device inside `∇F!`,
-  so nothing before the pendulum stage ever builds a device-resident cache. The preflight asserts
-  the property the harness needs, not the shim that currently provides it, so it stays correct when
-  the shim retires.
+  so nothing before the pendulum stage ever builds a device-resident cache. The gradient probe fails
+  on a CUDA host while GML #258 is open (K5).
 
 - **`[compat]` widens to the current releases of four dependencies**, as one change rather than four:
   `AbstractNeuralNetworks = "0.7, 0.8"`, `GeometricMachineLearning = "0.6, 0.7"`,

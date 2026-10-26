@@ -33,20 +33,18 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 # `GMLDatasets` is not registered, so it is reached by path.
 #
 # `GeometricMachineLearning` and `GeometricOptimizers` come from `main` rather than from the
-# registry. The harness needs four things that are not in a release:
+# registry. The harness needs four things, all of which are in the registered `GeometricOptimizers`
+# 0.9.1, so the entry follows `main` rather than reaching for a version the registry lacks:
 #
 #   * the optimizer step observer and `PhaseTimer` (GeometricOptimizers #78), which the decomposed
 #     schema-v4 timings are measured through;
 #   * the backend fixes that made a device-resident manifold parameter set usable (#79, #84, #85);
-#   * `CompositeMethod`, `leafmethod`, `accepts_parameter_set` and `sync_state!`, which are how the
-#     `scalar-moment-adam` baseline is assembled over a mixed tree — once, upstream, rather than
-#     once per trainer here;
-#   * `scripts/retraction_records.jl`, the retraction benchmark, which now lives beside the
+#   * `CompositeMethod`, which is how the `scalar-moment-adam` baseline is assembled over a mixed
+#     tree — once, upstream, rather than once per trainer here;
+#   * `scripts/retraction_records.jl`, the retraction benchmark, which lives beside the
 #     algorithms it measures and which this harness invokes rather than reimplements.
 #
-# The last two are `GeometricOptimizers` 0.8 and the `GeometricMachineLearning` that consumes them.
-#
-# `Manifest.toml` is not tracked — a manifest pinning two moving branch commits goes stale the day
+# `Manifest.toml` is not tracked — a manifest pinning two moving `main` commits goes stale the day
 # after it is committed, and the run bundle already carries the one a run actually resolved, under
 # `environments/scripts/`. Instantiate before a run, and refresh with `Pkg.update`, not
 # `Pkg.resolve`: a `rev = "main"` source is a fixed pin to `resolve`, which reports the stale commit
@@ -58,6 +56,6 @@ GeometricOptimizers = {url = "https://github.com/JuliaGNI/GeometricOptimizers.jl
 
 [compat]
 GeometricMachineLearning = "0.8"
-GeometricOptimizers = "0.8"
-NeuralNetworkParameters = "0.3"
+GeometricOptimizers = "0.9"
+NeuralNetworkParameters = "0.5"
 julia = "1.12"

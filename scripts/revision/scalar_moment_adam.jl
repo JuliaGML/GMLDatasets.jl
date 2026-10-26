@@ -38,9 +38,9 @@ why this baseline is tuned at its own rate and why that rate is the caller's to 
 function scalar_moment_adam_method(::Type{T}; beta1 = 9.0e-1, beta2 = 9.9e-1,
         epsilon = 1.0e-8, ambient_norm::Bool = false) where {T <: AbstractFloat}
     GeometricOptimizers.CompositeMethod(;
-        manifold = GeometricOptimizers.ScalarMomentAdam(T;
+        manifold = GeometricOptimizers.ScalarMomentAdam(;
             β₁ = T(beta1), β₂ = T(beta2), δ = T(epsilon), ambient_norm = ambient_norm),
-        array = GeometricOptimizers.Adam(T; β₁ = T(beta1), β₂ = T(beta2), δ = T(epsilon)))
+        array = GeometricOptimizers.Adam(; β₁ = T(beta1), β₂ = T(beta2), δ = T(epsilon)))
 end
 
 """The `second_moment` a run record quotes for the baseline, which is the mode it actually ran."""
