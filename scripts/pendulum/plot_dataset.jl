@@ -8,12 +8,14 @@
 # This regenerates the data rather than reading a file, which is the opposite of what
 # `scripts/gml/plot_mnist_results.jl` does and for the opposite reason: `pendulum()` is a fifth of a
 # second of Gauss collocation, not four configurations of 500 epochs, and it is deterministic, so
-# there is no run to read. The figures below are of exactly the data set `train_sae.jl` trains on.
+# there is no run to read. The figures below are of the default grid, which is what the
+# documentation's example loads; `train_sae.jl` trains on the separatrix-relative grid instead.
 
 using CairoMakie
 
 import GeometricProblems.Pendulum: default_parameters
-import GMLDatasets: angular_to_euclidean, euclidean_to_angular, pendulum, pendulum_energy
+import GMLDatasets: angular_to_euclidean, euclidean_to_angular, pendulum, pendulum_energy,
+                    separatrix_momentum
 
 const parameters = default_parameters()
 
@@ -40,13 +42,10 @@ const COLORMAP = :viridis
 const SEPARATRIX = parameters.m * parameters.g * parameters.l
 
 # The separatrix itself, drawn so that the boundary the colour map encodes is visible rather than
-# inferred. Setting H = mgl and solving for the momentum gives pθ = ±ml·√(2gl(1 − cos θ)), and the
+# inferred. Setting H = mgl and solving for the momentum gives pθ = ±separatrix_momentum(θ), and the
 # lift carries that curve into the Euclidean panel as (q₁, p₁) = (l·sin θ, pθ·cos θ / l).
 const SEPARATRIX_θ = range(0, 2π; length = 401)
-const SEPARATRIX_pθ = parameters.m * parameters.l .*
-                      sqrt.(max.(
-    2 * parameters.g * parameters.l .*
-    (1 .- cos.(SEPARATRIX_θ)), 0))
+const SEPARATRIX_pθ = separatrix_momentum.(SEPARATRIX_θ, Ref(parameters))
 
 "Draw both branches of the separatrix, in whichever coordinates `f` maps it to."
 function separatrix!(axis, f)

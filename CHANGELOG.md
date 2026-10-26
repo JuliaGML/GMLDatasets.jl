@@ -300,13 +300,41 @@ breaking release).
   opposite of the convention most textbooks use and it is what every choice of initial conditions
   here depends on, so the documentation says so in a box rather than in passing.
 
-  `scripts/pendulum/train_sae.jl` trains on `pendulum()`'s default bounded grid, including librating
-  and rotating trajectories on both sides of the separatrix. Although the standard reduction cannot
-  use a globally real-valued angular coordinate, a bounded cylinder can be represented differently
-  in two dimensions — for example as an annulus. The SAE experiment therefore tests whether a
-  learned reduction can represent the separatrix without reproducing `(θ, pθ)`. It uses the deeper
-  12,000-epoch architecture that demonstrated this behavior experimentally, prefers CUDA when
-  available, falls back to the host, and saves the trained parameters and loss curve with HDF5.
+  `scripts/pendulum/train_sae.jl` trains on the separatrix-relative grid of `momentum_fractions`
+  below, including librating and rotating trajectories on both sides of the separatrix. Although the
+  standard reduction cannot use a globally real-valued angular coordinate, a bounded cylinder can be
+  represented differently in two dimensions — for example as an annulus. The SAE experiment therefore
+  tests whether a learned reduction can represent the separatrix without reproducing `(θ, pθ)`. It
+  uses the deeper 12,000-epoch architecture that demonstrated this behavior experimentally, prefers
+  CUDA when available, falls back to the host, and saves the trained parameters and loss curve with
+  HDF5.
+
+- **`pendulum(; momentum_fractions)` samples the pendulum data set relative to the separatrix, and
+  `separatrix_momentum` is exported.** `separatrix_momentum(θ, parameters)` is the momentum
+  `m·l·√(2g·l·(1 − cos θ))` that puts the pendulum exactly on the separatrix at angle `θ`. Given a
+  vector of fractions `f`, `pendulum` keeps its `qsamples` angles and gives each of them the
+  momentum `f · separatrix_momentum(θ)`, so `|f| < 1` librates and `|f| > 1` rotates at *every*
+  angle, and the sign of `f` picks the direction of rotation. A Cartesian grid cannot express that:
+  a fixed `pθ` crosses the separatrix as `θ` varies, so no rectangle in `(θ, pθ)` controls how
+  close to the separatrix the data comes, and the band of rotating orbits nearest it is left empty.
+  `pmin`, `pmax` and `psamples` are unused with `momentum_fractions`; an angle grid that contains
+  the unstable equilibrium, where the separatrix momentum vanishes, raises an `ArgumentError`
+  rather than collapsing every trajectory onto the fixed point. `GeometricEquations` becomes a
+  direct dependency (`"0.21"`), because the ensemble is assembled from `equation`,
+  `EnsembleProblem` and the exported `Pendulum.hodeproblem`, rather than from the vector fields
+  that `GeometricProblems` keeps private.
+
+  `scripts/pendulum/train_sae.jl` trains on the grid that replaces a rectangle with data that
+  straddles the separatrix under control: ten angles between the stable and the unstable
+  equilibrium times nineteen fractions, 190 trajectories and 76 190 snapshots over `(0, 40)` with
+  `Δt = 0.1`, against 100 trajectories and 10 100 snapshots over `(0, 10)` on the default grid. The
+  longer `timespan` goes with the denser approach to the separatrix, because a librating orbit's
+  period `4K(√((1+H)/2))` diverges there: `f = 3/4` already has period 11.9, longer than the
+  `(0, 10)` the script used to integrate over, so the orbits nearest the separatrix did not close
+  even once and their level sets were only ever partially traced. Over `(0, 40)` every trajectory
+  closes at least twice, apart from the separatrix itself, which has no period. Six fractions
+  between `|f| = 1` and `|f| = 2` fill the band `H ∈ (1, 1.60)` that the figure's original set
+  jumped across, and four between `3/4` and `1` fill `H ∈ (0.913, 1)`.
 
 ### Changed
 
