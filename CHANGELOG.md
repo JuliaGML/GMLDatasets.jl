@@ -85,9 +85,8 @@ breaking release).
   `TrainingOptimizer` of GeometricMachineLearning `main`.** The Scripts workflow failed to resolve,
   because `scripts/Project.toml` bounded GeometricOptimizers to 0.8 while its `main` is 0.9; the bounds
   are now GeometricOptimizers `"0.9"` and NeuralNetworkParameters `"0.5"`, which GML `main` needs.
-  `CompositeMethod`, which the `scalar-moment-adam` baseline is built from, is on the branch
-  `composite-optimizer-method` of GeometricOptimizers #121 and not on its `main`, so that branch is
-  the source of GeometricOptimizers until #121 merges.
+  `CompositeMethod`, which the `scalar-moment-adam` baseline is built from, is in the registered
+  GeometricOptimizers 0.9.1, so `scripts/Project.toml` keeps the source on `main`.
 
   The harness follows the 0.9 API. A method takes its element type from its coefficients, so
   `Adam(T; …)`, `ScalarMomentAdam(T; …)` and `MomentumMethod(β)` become `Adam(; …)`,
@@ -163,16 +162,16 @@ breaking release).
   `doctest(GMLDatasets)`, as the Doctests job of CI does. No JET file is added.
 
 - **The scripts environment resolves `GeometricMachineLearning` and `GeometricOptimizers` from
-  branches, not from the registry**; `scripts/Project.toml` names the branches. The harness needs the
+  `main`, not from the registry**; `scripts/Project.toml` names the source. The harness needs the
   optimizer step observer and `PhaseTimer` of
   [GeometricOptimizers #78](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/78), the backend
   fixes of [#79](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/79),
   [#84](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/84) and
   [#85](https://github.com/JuliaGNI/GeometricOptimizers.jl/pull/85), and the 0.8 seams above.
-  `scripts/Manifest.toml` stays untracked: a manifest pinning two moving branch commits is stale the
+  `scripts/Manifest.toml` stays untracked: a manifest pinning two moving `main` commits is stale the
   day after it is committed, and every run bundle already carries the manifest that run resolved.
-  Refresh with `Pkg.update`, never `Pkg.resolve` — to `resolve` a branch source is a fixed pin, so
-  it calls a stale commit satisfiable and leaves the environment silently behind.
+  Refresh with `Pkg.update`, never `Pkg.resolve` — to `resolve` a `rev = "main"` source is a fixed
+  pin, so it calls a stale commit satisfiable and leaves the environment silently behind.
 
   Two of those fixes are what `scripts/revision/check_environment.jl` probes, because no version
   number can express them: that an optimizer cache and state can be built for a parameter set living
