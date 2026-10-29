@@ -58,6 +58,8 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 # source is a fixed pin to `resolve`, which reports the stale commit as satisfiable and leaves the
 # environment behind `main` without saying so.
 [sources]
+# GeometricProblems 0.10 (the Dirichlet `LinearWave`) is unreleased; see the root `Project.toml`.
+GeometricProblems = {url = "https://github.com/JuliaGNI/GeometricProblems.jl.git", rev = "linear-wave-dirichlet"}
 GMLDatasets = {path = ".."}
 GeometricMachineLearning = {url = "https://github.com/JuliaGNI/GeometricMachineLearning.jl.git", rev = "main"}
 
