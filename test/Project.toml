@@ -13,10 +13,13 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [sources]
+# GeometricProblems 0.10 (the Dirichlet `LinearWave`) is unreleased; see the root `Project.toml`.
+GeometricProblems = {url = "https://github.com/JuliaGNI/GeometricProblems.jl.git", rev = "linear-wave-dirichlet"}
 GMLDatasets = {path = ".."}
+GeometricMachineLearning = {url = "https://github.com/JuliaGNI/GeometricMachineLearning.jl.git", rev = "main"}
 
 [compat]
-NeuralNetworkParameters = "0.2.2, 0.3"
+NeuralNetworkParameters = "0.2.2, 0.3, 0.5"
 Random = "1"
 SHA = "0.7, 1"
 SafeTestsets = "0.1"

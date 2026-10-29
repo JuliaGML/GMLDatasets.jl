@@ -138,10 +138,9 @@ function test_optimizer_for_classification_layer(;
             Tuple, NamedTuple, NetworkParameters}, dl::DataLoader) = loss(model, ps, dl.input, dl.output)
     loss₁ = loss_dl(model, ps, dl)
 
-    opt = Optimizer(GradientOptimizer(), ps)
+    opt = TrainingOptimizer(ps; algorithm = GradientMethod(), linesearch = T(1e-2))
     dx = Zygote.gradient(ps -> loss_dl(model, ps, dl), ps)[1]
-    λY = GlobalSection(ps)
-    optimization_step!(opt, λY, ps, dx)
+    GeometricMachineLearning.optimization_step!(ps, opt, dx)
     loss₂ = loss_dl(model, ps, dl)
 
     @test loss₂ < loss₁
