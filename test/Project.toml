@@ -18,10 +18,13 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 GMLDatasets = {path = ".."}
 
 [compat]
+Aqua = "0.8.14"
+Documenter = "1"
+GeometricOptimizers = "0.9.2"
 InternedStrings = "0.7.1"
-NeuralNetworkParameters = "0.5"
+NeuralNetworkParameters = "0.5.3"
 Random = "1"
 SHA = "0.7, 1"
 SafeTestsets = "0.1"
 Test = "1"
-Zygote = "0.7"
+Zygote = "0.7.5"
