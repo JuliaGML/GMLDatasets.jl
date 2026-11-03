@@ -104,8 +104,9 @@ breaking release).
   `test/mnist_utils.jl` takes one `GradientMethod` step with
   `GeometricOptimizers.optimization_step!` and still asserts that the step lowers the loss, and
   `test/pendulum.jl` trains the symplectic autoencoder for one epoch with `train!`. `src/` is
-  unchanged. `test/Project.toml` bounds `NeuralNetworkParameters` to `"0.5"`, which GML 0.9 needs,
-  and adds `GeometricOptimizers`, whose binding inside GML is not public, with no bound of its own.
+  unchanged. `test/Project.toml` bounds `NeuralNetworkParameters` to the 0.5 series, which GML 0.9
+  needs, and adds `GeometricOptimizers`, whose binding inside GML is not public; the entry on the
+  test floors below gives both bounds.
   Under `NeuralNetworkParameters` 0.5 a function differentiated with respect to a parameter set is
   called with the `NetworkParameters` itself, so the `NamedTuple` arm of the annotation in
   `test/mnist_utils.jl` goes. `scripts/Project.toml` takes GML from the registry at `"0.9"` and no
@@ -253,7 +254,7 @@ breaking release).
   take their bounds with them unchanged, so the root `[compat]` loses those five entries. The
   package's own dependencies that the tests load (`AbstractNeuralNetworks`,
   `GeometricMachineLearning`, `GeometricProblems`) have no entry there, because the root bounds
-  apply, and the new `Aqua` and `Documenter` have none either.
+  apply. The new `Aqua` and `Documenter` take the bounds of the entry on the test floors below.
 
   The new `test/quality/aqua.jl` runs `Aqua.test_all`. One check is marked broken, with its issue:
   `piracies`, for the `DataLoader` constructor for labelled images (#29). The new
@@ -302,6 +303,18 @@ breaking release).
   Under the CI Downgrade job, which forces every dependency to its lower bound, these four resolved
   to the newer versions above instead, so the old floors advertised versions that the dependency
   graph cannot select. The upper bounds are unchanged.
+
+- **`test/Project.toml` bounds every registered test dependency at its lowest working version.**
+  The CI Downgrade job resolves `Project.toml` and `test/Project.toml` together at their lower
+  bounds and runs the suite there. Three floors rise to what that resolve selects:
+  `GeometricOptimizers` to `"0.9.2"` (new), which `GeometricMachineLearning` 0.9 requires;
+  `NeuralNetworkParameters` to `"0.5.3"` (from `"0.5"`), which `GeometricOptimizers` 0.9.1 and later
+  require; and `Zygote` to `"0.7.5"` (from `"0.7"`), because Zygote 0.7.0 to 0.7.4 require
+  `ForwardDiff` 0.10 and the resolve at the floors selects `ForwardDiff` 1. Two dependencies without a bound gain
+  one. `Aqua` takes `"0.8.14"`: without a bound it resolved to 0.1.0, which has no `piracies`
+  keyword, and 0.8.14 is the first release whose `piracies` check reads the method table of Julia
+  1.12 (0.8.0 to 0.8.13 stop with a `FieldError` on `Core.TypeName`). `Documenter` takes `"1"`, the
+  major release that `docs/Project.toml` uses and that the resolve selects.
 
 - **Julia 1.12 is the floor** (`[compat] julia = "1.12"`, from 1.11), in both `Project.toml` and
   `scripts/Project.toml`. A caller on Julia 1.11 can no longer install this version.
