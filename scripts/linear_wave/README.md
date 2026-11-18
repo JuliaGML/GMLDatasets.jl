@@ -15,8 +15,10 @@ in the `scripts/` environment.
 `common.jl` holds the settings, the architecture and the helpers the four share.
 
 `psd_bases/psd_bases.jl` compares symplectic bases of the training data beyond the cotangent lift:
-the cotangent lift (the PSD above), the complex SVD, and a BFGS minimizer of the training error on
-the symplectic Stiefel manifold, started at the cotangent lift. It writes `psd_bases.csv` and
+the cotangent lift (the PSD above), the complex SVD, and minimizers of the training error on the
+symplectic Stiefel manifold, started at the cotangent lift, found by BFGS and by Adam with the
+settings of the SAE training (`LW_ALGORITHMS=bfgs,adam`, the default). BFGS takes hours at the
+largest reduced dimensions, Adam seconds per dimension. It writes `psd_bases.csv` and
 `psd_bases.h5`, and has its own environment, because it needs GeometricOptimizers 0.10 while
 `scripts/` holds GeometricMachineLearning 0.9, which bounds GeometricOptimizers to 0.9:
 

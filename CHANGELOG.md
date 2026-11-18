@@ -13,8 +13,10 @@ breaking release).
 - **`scripts/linear_wave/psd_bases/`, symplectic bases beyond the cotangent lift.** For every
   reduced dimension of the linear-wave experiment, `psd_bases.jl` compares three bases of the
   training snapshots in $Sp(2n, 2N)$: the cotangent lift (the PSD of `errors.jl`), the complex SVD,
-  and a BFGS minimizer of the training error on `SymplecticStiefelManifold`, started at the
-  cotangent lift. Each gets the projection and reduction errors at the test wave speeds, its
+  and minimizers of the training error on `SymplecticStiefelManifold`, started at the cotangent
+  lift, found by BFGS on all snapshots and by Adam on minibatches with the settings of the SAE
+  training ($\eta = 10^{-3}$, $\beta_1 = 0.9$, $\beta_2 = 0.99$, $\delta = 10^{-8}$, 1000 epochs,
+  batch size 512); `LW_ALGORITHMS` selects them. Each gets the projection and reduction errors at the test wave speeds, its
   training error, its symplecticity defect and its condition number. It has its own environment,
   because it needs GeometricOptimizers 0.10 and `scripts/` holds GeometricMachineLearning 0.9,
   which bounds GeometricOptimizers to 0.9; it therefore builds the data from GeometricProblems
