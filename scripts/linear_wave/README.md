@@ -14,6 +14,24 @@ in the `scripts/` environment.
 
 `common.jl` holds the settings, the architecture and the helpers the four share.
 
+`psd_bases/psd_bases.jl` compares symplectic bases of the training data beyond the cotangent lift:
+the cotangent lift (the PSD above), the complex SVD, and a BFGS minimizer of the training error on
+the symplectic Stiefel manifold, started at the cotangent lift. It writes `psd_bases.csv` and
+`psd_bases.h5`, and has its own environment, because it needs GeometricOptimizers 0.10 while
+`scripts/` holds GeometricMachineLearning 0.9, which bounds GeometricOptimizers to 0.9:
+
+```sh
+julia --project=scripts/linear_wave/psd_bases -e 'using Pkg; Pkg.instantiate()'
+LW_REFERENCE_ERRORS=<an errors.csv of errors.jl> \
+    julia --project=scripts/linear_wave/psd_bases scripts/linear_wave/psd_bases/psd_bases.jl
+```
+
+With `LW_REFERENCE_ERRORS` the cotangent lift must reproduce the PSD rows of that file. The errors
+of `errors.jl` are those of `projection_error` and `reduction_error` of GeometricMachineLearning,
+$(\lVert\Delta Q\rVert_F+\lVert\Delta P\rVert_F)/(\lVert Q\rVert_F+\lVert P\rVert_F)$; `psd_bases.jl`
+writes them as `*_qp` beside the Euclidean errors
+$\sqrt{\sum_t\lVert x^{(t)}-y^{(t)}\rVert^2/\sum_t\lVert x^{(t)}\rVert^2}$.
+
 ## Running
 
 From the repository root:
