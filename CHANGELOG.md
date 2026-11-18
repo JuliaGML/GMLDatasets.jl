@@ -10,6 +10,26 @@ breaking release).
 
 ### Added
 
+- **`scripts/linear_wave/psd_bases/`, symplectic bases beyond the cotangent lift.** For every
+  reduced dimension of the linear-wave experiment, `psd_bases.jl` compares three bases of the
+  training snapshots in $Sp(2n, 2N)$: the cotangent lift (the PSD of `errors.jl`), the complex SVD,
+  and minimizers of the training error on `SymplecticStiefelManifold`, started at the cotangent
+  lift, found by BFGS on all snapshots and by Adam on minibatches with the settings of the SAE
+  training ($\eta = 10^{-3}$, $\beta_1 = 0.9$, $\beta_2 = 0.99$, $\delta = 10^{-8}$, 1000 epochs,
+  batch size 512); `LW_ALGORITHMS` selects them. Each gets the projection and reduction errors at the test wave speeds, its
+  training error, its symplecticity defect and its condition number. It has its own environment,
+  because it needs GeometricOptimizers 0.10 and `scripts/` holds GeometricMachineLearning 0.9,
+  which bounds GeometricOptimizers to 0.9; it therefore builds the data from GeometricProblems
+  directly. Two checks fail loudly: the analytic gradient against a central difference, and, with
+  `LW_REFERENCE_ERRORS`, the cotangent lift against the PSD rows of an `errors.csv`.
+
+  It writes both the errors of the paper's formula, $\sqrt{\sum_t\lVert x^{(t)}-y^{(t)}\rVert^2/\sum_t\lVert x^{(t)}\rVert^2}$,
+  and those that `errors.jl` writes, because `projection_error` and `reduction_error` of
+  GeometricMachineLearning 0.9 compute $(\lVert\Delta Q\rVert_F+\lVert\Delta P\rVert_F)/(\lVert Q\rVert_F+\lVert P\rVert_F)$
+  instead: its `_norm` of a $(q, p)$ pair is $(\lVert q\rVert+\lVert p\rVert)/\sqrt2$. At
+  $n = 2$, $\mu = 0.47$ the cotangent lift has a projection error of $0.667$ in the first and
+  $0.693$ in the second.
+
 - **`onehotbatch(S, target)`**, which encodes the labels in a chosen element type. The one-argument
   form is unchanged and is now a forwarder to it, so the encoding keeps the label type by default.
   The output uses the same backend as `target`.
