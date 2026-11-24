@@ -5,6 +5,7 @@ const GROUPS = isempty(ARGS) ? ["core", "slow"] : ARGS
 if "core" in GROUPS
     @safetestset "Aqua" include("quality/aqua.jl")
     @safetestset "MNIST utilities and the classification DataLoader" include("mnist_utils.jl")
+    @safetestset "IDX reader" include("idx.jl")
     @safetestset "Docstrings" include("integration/docstrings.jl")
     @safetestset "Pendulum dataset" include("pendulum.jl")
     @safetestset "Linear wave dataset" include("linear_wave.jl")

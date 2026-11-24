@@ -4,8 +4,8 @@
 # environment unprecompilable there. A Mac adds it by hand with
 #     julia --project=scripts -e 'using Pkg; Pkg.add("Metal")'
 # and keeps that line out of commits. `CUDA` is different — it installs, though non-functional, on
-# machines without a device, and the CUDA scripts fall back to the host. The environment does not
-# resolve while `MLDatasets` and `CUDA` 6 cannot be installed together (K6 in `KNOWN_ISSUES.md`).
+# machines without a device, so the environment resolves everywhere and the CUDA scripts fall back to
+# the host.
 
 [deps]
 AbstractNeuralNetworks = "60874f82-5ada-4c70-bd1c-fa6be7711c8a"
@@ -21,7 +21,6 @@ NeuralNetworkParameters = "67f4d93a-60e9-472b-8cdd-1ccf6005724a"
 HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-MLDatasets = "eb30cadb-4394-5ae3-aed4-317e484a6458"
 NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"

@@ -1,9 +1,8 @@
 # A port of `scripts/gml/transformer_mnist.jl` that only relies on `GeometricOptimizers`
-# (`GeometricMachineLearning` depends on that package, so it cannot be used here — which is also why
-# this script loads `MLDatasets` directly instead of going through `GMLDatasets`, which imports
-# `ReducedComplexityModeling.DataLoader` through `GeometricMachineLearning`). Everything that
-# `GeometricMachineLearning` supplies through `DataLoader`, `ClassificationTransformer` and
-# `NeuralNetwork` is written out explicitly below.
+# (`GeometricMachineLearning` depends on that package, so it cannot be used here). The data set comes
+# from `GMLDatasets.mnist`, which loads `GeometricMachineLearning` as a dependency; nothing of its API
+# is used. Everything that `GeometricMachineLearning` supplies through `DataLoader`,
+# `ClassificationTransformer` and `NeuralNetwork` is written out explicitly below.
 #
 # The neural network is the same as `ClassificationTransformer(dl; n_heads = n_heads, L = L,
 # add_connection = false, Stiefel = Stiefel)`, i.e. `L` blocks of
@@ -28,7 +27,7 @@ using SimpleSolvers: Static
 using LinearAlgebra: norm, Adjoint, Transpose
 using NNlib: batched_mul, batched_transpose, softmax, BatchedAdjOrTrans
 using Printf: @printf
-import ForwardDiff, JLD2, MLDatasets, Random, Zygote
+import ForwardDiff, GMLDatasets, JLD2, Random, Zygote
 
 # ------------------------------------------------------------------- hyperparameters ---
 
@@ -366,8 +365,8 @@ end
 # ------------------------------------------------------------------------------- run ---
 
 println("loading MNIST ...")
-train_x, train_y = MLDatasets.MNIST(split = :train)[:]
-test_x, test_y = MLDatasets.MNIST(split = :test)[:]
+train_x, train_y = GMLDatasets.mnist(:train)
+test_x, test_y = GMLDatasets.mnist(:test)
 
 const train_input = split_and_flatten(T.(train_x), patch_length)
 const train_output = onehotbatch(train_y)

@@ -9,9 +9,8 @@ Dataset-backed demonstrations for
 [GeometricOptimizers](https://juliagni.github.io/GeometricOptimizers.jl/latest/).
 
 Both of those packages are libraries for *scientific* machine learning and neither should depend on
-an image-dataset package to document itself. This one does: it holds the
-[`MLDatasets`](https://github.com/JuliaML/MLDatasets.jl) glue, the MNIST and Fashion-MNIST
-demonstrations, the numerical experiment of [Brantner:2023](@cite) that shows manifold
+an image-dataset package to document itself. This one does: it holds a reader for the IDX files of
+MNIST and Fashion-MNIST, the demonstrations on them, the numerical experiment of [Brantner:2023](@cite) that shows manifold
 optimization making a vision transformer trainable at all, and a symplectically integrated pendulum
 data set for the autoencoders.
 

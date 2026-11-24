@@ -57,6 +57,28 @@ end
 test_onehotbatch([1, 2, 5, 0])
 @test onehotbatch([0]) == reshape([1, zeros(Int, 9)...], 10, 1, 1)
 
+# A number that is not `isbits` cannot enter a kernel, so these take the host path.
+@testset "onehotbatch with element types that are not isbits" begin
+    labels = [0, 9, 3]
+    expected = zeros(Int, 10, 1, 3)
+    for (sample, label) in pairs(labels)
+        expected[label + 1, 1, sample] = 1
+    end
+
+    encoded = onehotbatch(BigFloat, labels)
+    @test encoded isa Array{BigFloat, 3}
+    @test encoded == expected
+
+    big_labels = BigInt.(labels)
+    encoded = onehotbatch(big_labels)
+    @test encoded isa Array{BigInt, 3}
+    @test encoded == expected
+
+    encoded = onehotbatch(Float32, big_labels)
+    @test encoded isa Array{Float32, 3}
+    @test encoded == expected
+end
+
 @testset "split_and_flatten and onehotbatch preprocessing contract" begin
     patch_length = 7
     n = 28 ÷ patch_length
@@ -99,7 +121,7 @@ end
 @doc raw"""
 Generates an MNIST-like dummy data set.
 
-The tests must not download anything, so everything that would otherwise come from `MLDatasets` is
+The tests must not download anything, so everything that would otherwise come from `mnist` is
 faked here: a tensor of random images and a vector of random labels in ``0, \ldots, 9``.
 """
 function generate_dummy_mnist(dim₁ = 28, dim₂ = 28, number_images = 100, T = Float32)

@@ -44,6 +44,9 @@ onehotbatch(target)
 ```
 """
 function onehotbatch(::Type{S}, target::AbstractVector{T}) where {S <: Number, T <: Integer}
+    # A kernel cannot hold a number that is not `isbits`, such as a `BigFloat` or a `BigInt`, and
+    # such a number lives on the host anyway.
+    (isbitstype(S) && isbitstype(T)) || return onehotbatch_host(S, target)
     backend = networkbackend(target)
     output = KernelAbstractions.zeros(backend, S, 10, length(target))
     assign_val! = assign_val_kernel!(backend)
@@ -52,6 +55,14 @@ function onehotbatch(::Type{S}, target::AbstractVector{T}) where {S <: Number, T
 end
 
 onehotbatch(target::AbstractVector{T}) where {T <: Integer} = onehotbatch(T, target)
+
+function onehotbatch_host(::Type{S}, target::AbstractVector{<:Integer}) where {S <: Number}
+    output = zeros(S, 10, length(target))
+    for (i, t) in enumerate(target)
+        output[t + 1, i] = one(S)
+    end
+    reshape(output, 10, 1, length(target))
+end
 
 # """
 # Based on coordinates i,j this returns the batch index (for MNIST data set for now).

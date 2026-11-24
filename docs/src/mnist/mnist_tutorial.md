@@ -2,7 +2,7 @@
 
 In this tutorial we show how we can use `GeometricMachineLearning` to build a vision transformer and apply it for MNIST [deng2012mnist](@cite), while also putting some of the weights on a manifold. This is also the result presented in [Brantner:2023](@cite).
 
-`GMLDatasets` gets the data set from [`MLDatasets`](https://github.com/JuliaML/MLDatasets.jl) and hands it back as a [`DataLoader`](@ref). For this we need to specify a *patch length*[^1]:
+`GMLDatasets` downloads the data set on first use, reads it with [`read_idx`](@ref) and hands it back as a [`DataLoader`](@ref). For this we need to specify a *patch length*[^1]:
 
 [^1]: [`mnist_data_loader`](@ref) builds the [`DataLoader`](@ref) with [`split_and_flatten`](@ref) and [`onehotbatch`](@ref) internally.
 
