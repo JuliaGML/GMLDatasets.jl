@@ -98,6 +98,28 @@ breaking release).
 
 ### Changed
 
+- **GMLDatasets requires GeometricMachineLearning 0.10 and KernelAbstractions 0.10**
+  (`[compat]` `"0.10"`, from `"0.9"`, and `"0.10.5"`, from `"0.9.38, 0.10"`). An environment that
+  holds GeometricMachineLearning 0.9 or KernelAbstractions 0.9 cannot install this version. On
+  KernelAbstractions 0.10 `CPU()` is the PoCL backend, so `onehotbatch` and `split_and_flatten`
+  run their host kernels through OpenCL; their results do not change. A kernel compiled there
+  cannot hold a number that is not `isbits`: `onehotbatch(BigFloat, target)` raises a
+  `GPUCompiler.InvalidIRError`. `AbstractNeuralNetworks`
+  goes to `"0.10"` (from `"0.9.2"`), which GML 0.10 requires. The KernelAbstractions floor is
+  0.10.5 because AbstractNeuralNetworks 0.10 requires it, so the Downgrade job cannot reach a
+  lower release. `GeometricIntegrators` widens to `"0.18.6, 0.19"` and `GeometricSolutions` to
+  `"0.6.6, 0.7"`; the floors stay. `test/Project.toml` takes `GeometricOptimizers` `"0.10"` (from
+  `"0.9.2"`), `docs/Project.toml` takes `ReducedComplexityModeling` `"0.6"` (from `"0.5"`), and
+  `scripts/Project.toml` takes `GeometricMachineLearning` `"0.10"`, `GeometricOptimizers` `"0.10"`
+  (from `"0.9.1"`) and `ReducedComplexityModeling` `"0.6"` (from `"0.5"`). No line of `src/`,
+  `test/`, `docs/` or `scripts/` changes. These bounds replace those of the same dependencies in
+  the entry on GML 0.9 below.
+
+  GMLDatasets and CUDA 6.5, the first CUDA release on KernelAbstractions 0.10, cannot be installed
+  together: `MLDatasets` requires `Pickle` 0.3, which admits no `StridedViews` release that CUDA 6
+  admits. So the scripts environment, which has `CUDA`, does not resolve until `Pickle` releases
+  that support (`KNOWN_ISSUES.md` K6).
+
 - **GMLDatasets requires GeometricMachineLearning 0.9** (`[compat]` `"0.9"`, from
   `"0.6.1, 0.7, 0.8"`). GML 0.9 trains with `TrainingOptimizer` and `train!` and no longer defines
   `Optimizer` or `GradientOptimizer`, so the two tests that trained a network follow it:

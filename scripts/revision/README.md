@@ -42,7 +42,7 @@ cost a run its pendulum stage after the image stages had already succeeded. **Th
 hold today:** the gradient arrives on the host, for a defect in the packages that produce it —
 [`GeometricMachineLearning` #258](https://github.com/JuliaGNI/GeometricMachineLearning.jl/issues/258)
 and [`AbstractNeuralNetworks` #39](https://github.com/JuliaGNI/AbstractNeuralNetworks.jl/issues/39) —
-and `GeometricOptimizers` 0.9 refuses a host gradient at a device point. On a CUDA host the
+and `GeometricOptimizers` 0.9 and 0.10 refuse a host gradient at a device point. On a CUDA host the
 preflight therefore stops, and the pendulum stage cannot run, until those are fixed (K5 in
 `KNOWN_ISSUES.md`). The image stages never take this path and are unaffected.
 
