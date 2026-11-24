@@ -46,7 +46,7 @@ println("neural_network_parameters_version=", pkgversion(NeuralNetworkParameters
 #     hands `rgrad` an ambient gradient on the host, `∇L' * Y.A` is a CPU `gemm!` on a device
 #     pointer.
 #
-# The second does not hold with GeometricOptimizers 0.9: `rgrad` refuses the host gradient below
+# The second does not hold with GeometricOptimizers 0.9 and 0.10: `rgrad` refuses the host gradient below
 # with `ArgumentError: mixed backends`, and the pullback hands it a host gradient until
 # JuliaGNI/GeometricMachineLearning.jl#258 and JuliaGNI/AbstractNeuralNetworks.jl#39 close. The
 # probe passes a host array on purpose, so it needs a device gradient from the pullback once those

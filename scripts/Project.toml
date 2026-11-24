@@ -21,7 +21,6 @@ NeuralNetworkParameters = "67f4d93a-60e9-472b-8cdd-1ccf6005724a"
 HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-MLDatasets = "eb30cadb-4394-5ae3-aed4-317e484a6458"
 NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
@@ -34,8 +33,9 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 # `GMLDatasets` is not registered, so it is reached by path.
 #
-# `GeometricOptimizers` comes from the registry, and `[compat]` requires 0.9.1, the first release
-# that carries everything this harness needs of it:
+# `GeometricOptimizers` comes from the registry, and `[compat]` requires 0.10, the line that
+# `GeometricMachineLearning` 0.10 requires. Every 0.10 release carries everything this harness
+# needs of it:
 #
 #   * the optimizer step observer and `PhaseTimer` (GeometricOptimizers #78), which the decomposed
 #     schema-v4 timings are measured through;
@@ -58,8 +58,8 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 GMLDatasets = {path = ".."}
 
 [compat]
-GeometricMachineLearning = "0.9"
-GeometricOptimizers = "0.9.1"
+GeometricMachineLearning = "0.10"
+GeometricOptimizers = "0.10"
 NeuralNetworkParameters = "0.5"
-ReducedComplexityModeling = "0.5"
+ReducedComplexityModeling = "0.6"
 julia = "1.12"

@@ -97,7 +97,7 @@ using SimpleSolvers: Static
 using LinearAlgebra: norm, I, Adjoint, Transpose
 using NNlib: batched_mul, batched_transpose, softmax, BatchedAdjOrTrans
 using Printf: @printf, @sprintf
-import CUDA, ForwardDiff, JLD2, MLDatasets, Random, Zygote
+import CUDA, ForwardDiff, GMLDatasets, JLD2, Random, Zygote
 
 # --------------------------------------------------------------------------- device ---
 
@@ -761,8 +761,8 @@ end
 const script_start = time()
 
 println("loading MNIST ...")
-train_x, train_y = MLDatasets.MNIST(split = :train)[:]
-test_x, test_y = MLDatasets.MNIST(split = :test)[:]
+train_x, train_y = GMLDatasets.mnist(:train)
+test_x, test_y = GMLDatasets.mnist(:test)
 
 # the data set stays on the host; the batches are uploaded one at a time
 const train_input = split_and_flatten(T.(train_x), patch_length)

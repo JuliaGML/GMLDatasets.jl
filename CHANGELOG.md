@@ -98,6 +98,66 @@ breaking release).
 
 ### Changed
 
+- **GMLDatasets requires GeometricMachineLearning 0.10 and KernelAbstractions 0.10**
+  (`[compat]` `"0.10"`, from `"0.9"`, and `"0.10.5"`, from `"0.9.38, 0.10"`). An environment that
+  holds GeometricMachineLearning 0.9 or KernelAbstractions 0.9 cannot install this version. On
+  KernelAbstractions 0.10 `CPU()` is the PoCL backend, so `onehotbatch` and `split_and_flatten`
+  run their host kernels through OpenCL; their results do not change. A kernel compiled on PoCL
+  cannot hold a number that is not `isbits`, so `onehotbatch` builds the encoding on the host when
+  the element type or the label type is not `isbits` (`onehotbatch(BigFloat, labels)`,
+  `onehotbatch(BigInt.(labels))`), and returns the same arrays as on KernelAbstractions 0.9;
+  without that path the first raised a `GPUCompiler.InvalidIRError` and the second failed with
+  "uses a boxed constant". `AbstractNeuralNetworks`
+  goes to `"0.10"` (from `"0.9.2"`), which GML 0.10 requires. The KernelAbstractions floor is
+  0.10.5 because AbstractNeuralNetworks 0.10 requires it, so the Downgrade job cannot reach a
+  lower release. `GeometricIntegrators` widens to `"0.18.6, 0.19"` and `GeometricSolutions` to
+  `"0.6.6, 0.7"`; the floors stay. `test/Project.toml` takes `GeometricOptimizers` `"0.10"` (from
+  `"0.9.2"`), `docs/Project.toml` takes `ReducedComplexityModeling` `"0.6"` (from `"0.5"`), and
+  `scripts/Project.toml` takes `GeometricMachineLearning` `"0.10"`, `GeometricOptimizers` `"0.10"`
+  (from `"0.9.1"`) and `ReducedComplexityModeling` `"0.6"` (from `"0.5"`).
+  `docs/Project.toml` bounds `HDF5` to `"0.17"` (from `"0.16, 0.17"`), because
+  ReducedComplexityModeling 0.6 requires HDF5 0.17. The root `[compat]` no longer lists
+  `MLDatasets` (see the next entry). These bounds replace those of the same dependencies in the
+  entry on GML 0.9 below.
+
+- **MLDatasets is no longer a dependency; GMLDatasets reads MNIST and Fashion-MNIST itself.**
+  `mnist(split)` and `fashion_mnist(split)` return the same value as before: the named tuple
+  `(features, targets)` that `MLDatasets.MNIST(split = split)[:]` returned, with `features` an
+  `Array{Float32,3}` of size 28×28×n scaled to [0, 1] (the bytes divided by `Float32(255)`, in the
+  same layout and orientation) and `targets` a `Vector{Int}`. On synthetic IDX files the result is
+  bitwise identical to MLDatasets 0.7.22 for both splits of both data sets and every byte value.
+
+  The reason is that MLDatasets 0.7 requires `Pickle` 0.3, and no `Pickle` 0.3 release can be
+  installed beside CUDA 6 (0.3.4–0.3.7 bound `StridedViews` to releases that admit CUDA 4 and 5
+  only, and 0.3.0–0.3.3 require a `DataStructures` that the `Symbolics` chain excludes). Without
+  MLDatasets, GMLDatasets installs beside CUDA 6.5, the first CUDA release on KernelAbstractions
+  0.10, and the scripts environment, which has `CUDA`, resolves (checked on Julia 1.13.4 and 1.12.7
+  with CUDA 6.5.1).
+
+  `read_idx`, an internal and documented function that is not exported, parses IDX files of
+  unsigned bytes and decompresses `.gz` files. `DataDeps` (`"0.7.14, 1"`) downloads and verifies the
+  files, from the same mirrors and with the same SHA-256 checksums that MLDatasets 0.7 registers;
+  the range admits the `DataDeps` of every MLDatasets 0.7 release, so both packages can share an
+  environment. `CodecZlib` (`"0.7.5"`, the first release that admits TranscodingStreams 0.11)
+  decompresses the files.
+
+  The data are cached in the data dependencies `GMLDatasets_MNIST` and `GMLDatasets_FashionMNIST`
+  (by default `~/.julia/datadeps/GMLDatasets_MNIST` and `~/.julia/datadeps/GMLDatasets_FashionMNIST`),
+  compressed as the mirrors serve them. The names differ from the `MNIST` and `FashionMNIST` of
+  MLDatasets so that both packages can be loaded in one session. **An earlier MLDatasets download
+  is therefore not reused:** the first call downloads the files again, about 11 MB for MNIST and
+  30 MB for Fashion-MNIST. `ENV["DATADEPS_ALWAYS_ACCEPT"] = true` still skips the prompt.
+
+  `scripts/Project.toml` drops `MLDatasets`, and the five scripts
+  `scripts/geometric_optimizers/mnist.jl`, `mnist_cuda.jl`, `mnist_metal.jl`,
+  `mnist_metal_short.jl` and `mnist_cuda_repetitions.jl` load the data through `GMLDatasets.mnist`
+  and `fashion_mnist`. `test/Project.toml` drops `InternedStrings` and its `"0.7.1"` bound, which
+  existed only because `Pickle`, reached through MLDatasets, admitted 0.7.0, and nothing reaches
+  `InternedStrings` any more; it gains `CodecZlib`, with no bound, for the gzip fixtures. The tests
+  download nothing: `test/idx.jl` checks the parser (header, dimensions, payload order, `.gz`,
+  malformed headers, truncated and over-long payloads) and the scaling on fixtures written in the
+  test.
+
 - **GMLDatasets requires GeometricMachineLearning 0.9** (`[compat]` `"0.9"`, from
   `"0.6.1, 0.7, 0.8"`). GML 0.9 trains with `TrainingOptimizer` and `train!` and no longer defines
   `Optimizer` or `GradientOptimizer`, so the two tests that trained a network follow it:

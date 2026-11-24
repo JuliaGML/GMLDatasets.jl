@@ -110,7 +110,7 @@
 using GeometricOptimizers
 using GeometricOptimizers: solver_step!, increase_iteration_number!, initialize_state!,
                            observe_optimizer_phase
-using GMLDatasets: split_and_flatten, onehotbatch
+using GMLDatasets: split_and_flatten, onehotbatch, mnist, fashion_mnist
 # `GeometricOptimizers` 0.5.0 dropped `ParameterHandling` for `NeuralNetworkParameters`, which is the
 # package that owns a parameter set and does its flattening. This script used to reach the old one
 # through `GeometricOptimizers`, so it stopped loading at that release; these are the replacements.
@@ -123,7 +123,7 @@ using SimpleSolvers: Static
 using LinearAlgebra: norm, I, Adjoint, Transpose
 using NNlib: batched_mul, batched_transpose, softmax, BatchedAdjOrTrans
 using Printf: @printf, @sprintf
-import CUDA, ForwardDiff, JLD2, MLDatasets, Random, Statistics, Zygote
+import CUDA, ForwardDiff, JLD2, Random, Statistics, Zygote
 
 # The record layer, through its one entry point. `RunRecords` is what the validators read the
 # headers, the configuration table and the CSV dialect out of, so the trainer reaching it by the
@@ -952,9 +952,9 @@ const losses_io = open(losses_path, "a")
 const script_start = time()
 
 println("loading $dataset_name ...")
-dataset = dataset_name == "mnist" ? MLDatasets.MNIST : MLDatasets.FashionMNIST
-train_x, train_y = dataset(split = :train)[:]
-test_x, test_y = dataset(split = :test)[:]
+dataset = dataset_name == "mnist" ? mnist : fashion_mnist
+train_x, train_y = dataset(:train)
+test_x, test_y = dataset(:test)
 
 if training_samples > 0
     n = min(training_samples, size(train_x, 3))

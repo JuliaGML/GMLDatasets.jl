@@ -4,9 +4,9 @@
 Dataset-backed demonstrations for `GeometricMachineLearning` and `GeometricOptimizers`.
 
 Both of those packages are libraries for scientific machine learning and neither should depend on an
-image-dataset package to document itself. Everything that does lives here: the
-[`MLDatasets`](https://github.com/JuliaML/MLDatasets.jl) glue, the MNIST and Fashion-MNIST
-demonstrations and the numerical experiment from [Brantner:2023](@cite).
+image-dataset package to document itself. Everything that does lives here: a reader for the IDX
+files of MNIST and Fashion-MNIST, the demonstrations on them and the numerical experiment from
+[Brantner:2023](@cite).
 
 The entry points are [`mnist_data_loader`](@ref) and [`fashion_mnist_data_loader`](@ref), which hand
 back a `ReducedComplexityModeling.DataLoader` in the *time series* format a transformer wants:
@@ -36,7 +36,8 @@ using KernelAbstractions
 # one for labelled image data, which does not belong in `ReducedComplexityModeling` (see
 # `data_loader.jl`). `ReducedComplexityModeling` owns it; `GeometricMachineLearning` re-exports it.
 import GeometricMachineLearning: DataLoader
-import MLDatasets
+using CodecZlib: GzipDecompressorStream
+using DataDeps: DataDep, register, @datadep_str
 
 export DataLoader
 export split_and_flatten, onehotbatch
@@ -48,8 +49,11 @@ export linear_wave, linear_wave_snapshots, linear_wave_parameters
 
 include("mnist_utils.jl")
 include("data_loader.jl")
+include("idx.jl")
 include("datasets.jl")
 include("pendulum.jl")
 include("linear_wave.jl")
+
+__init__() = register_datadeps()
 
 end
