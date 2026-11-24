@@ -89,8 +89,9 @@ runs the same four trainings. It stays at `n_epochs = 5`, because on the host a 
 ## The CUDA script
 
 `mnist_cuda.jl` is the same script with the network on the GPU and `n_epochs = 500`. `CUDA` *is* part
-of `scripts/Project.toml`: it installs, though non-functional, on machines without a CUDA device, so
-the environment resolves everywhere and `mnist_cuda.jl` falls back to the host where there is none.
+of `scripts/Project.toml`: it installs, though non-functional, on machines without a CUDA device, and
+`mnist_cuda.jl` falls back to the host where there is none. The environment does not resolve while
+`MLDatasets` and `CUDA` 6 cannot be installed together (K6 in `KNOWN_ISSUES.md`).
 
 **The parameters stay on the host**, and so do the `Optimizer` and its `OptimizerState`. It costs
 little: the optimizer touches only the 154938 parameters, ≈1.2 MB up and down per step, against ≈3 GB

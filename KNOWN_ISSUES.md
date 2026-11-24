@@ -26,7 +26,7 @@
 
 - **location:** `scripts/revision/check_environment.jl:62`
 - **evidence:** the preflight calls `rgrad(Y, randn(Float32, 4, 2))` at a `StiefelManifold` on the
-  device. GeometricOptimizers 0.9 and 0.10 check the backends there (`_check_gradient_backend`) and raises
+  device. GeometricOptimizers 0.9 and 0.10 check the backends there (`_check_gradient_backend`) and raise
   `ArgumentError: mixed backends`, where 0.8 moved the gradient across with a temporary
   `_match_backend`. The pendulum trainer passes Zygote's gradient through GML's `train!` to the
   optimizer step, and that gradient is on the host for device parameters (GML #258, AbstractNeuralNetworks
@@ -35,17 +35,21 @@
 - **kind:** upstream
 - **found:** 2026-10-23, in the port of the revision harness to GeometricOptimizers 0.9
 
-### K6 · The scripts environment does not resolve: `Pickle` admits no `StridedViews` release that `CUDA` 6 admits
+### K6 · The scripts environment does not resolve: no `Pickle` 0.3 release installs beside `CUDA` 6
 
 - **location:** `scripts/Project.toml`
-- **evidence:** `Pkg.resolve()` in `scripts/` stops with "Unsatisfiable requirements detected for
-  package Pickle". GeometricMachineLearning 0.10 and GeometricOptimizers 0.10 require
-  KernelAbstractions 0.10.5, which admits CUDA 6.5 only, and the `CUDA` that the GPU scripts load is
-  a dependency of the environment. `MLDatasets` 0.7, a dependency of this package, requires
-  `Pickle` 0.3, and `Pickle` 0.3.7, its newest release, requires `StridedViews` 0.2 to 0.4. Those
+- **evidence:** `Pkg.resolve()` in `scripts/` stops with "Unsatisfiable requirements detected"; the
+  package the message names depends on the Julia version (`DataStructures` on 1.13.4,
+  `MultivariatePolynomials` on 1.12.7). GeometricMachineLearning 0.10 and GeometricOptimizers 0.10
+  require KernelAbstractions 0.10.5, which admits CUDA 6.5 only, and the `CUDA` that the GPU scripts
+  load is a dependency of the environment. `MLDatasets` 0.7, a dependency of this package, requires
+  `Pickle` 0.3. `Pickle` 0.3.4 to 0.3.7, the newest release, require `StridedViews` 0.2 to 0.4. Those
   `StridedViews` releases bound their `CUDA` extension to CUDA 4 and 5; only `StridedViews` 0.5
-  admits CUDA 6. A copy of `scripts/Project.toml` without `CUDA` resolves, and
-  `test_step_timing.jl` and `test_leaf_composite.jl` pass in it. The fix is a `Pickle` release that
-  admits `StridedViews` 0.5 (chengchingwen/Pickle.jl#50, open).
+  admits CUDA 6. `Pickle` 0.3.0 to 0.3.3 do not depend on `StridedViews`, but they require
+  `DataStructures` 0.18, and the `MultivariatePolynomials` that `Symbolics` takes, through
+  `GeometricProblems` and `EulerLagrange`, requires `DataStructures` 0.19. A copy of
+  `scripts/Project.toml` without `CUDA` resolves, and `test_step_timing.jl` and
+  `test_leaf_composite.jl` pass in it. The fix is a `Pickle` release that admits `StridedViews` 0.5
+  (chengchingwen/Pickle.jl#50, open).
 - **kind:** upstream
 - **found:** 2026-11-24, in the move to GeometricMachineLearning 0.10
